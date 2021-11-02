@@ -10,14 +10,12 @@ import lombok.Data;
 @Data
 public class AsteroidView {
     ImageView imageView;
-    Shape shape;
 
     public AsteroidView(Image image, double x, double y) {
         imageView = new ImageView(image);
         imageView.setLayoutX(x);
         imageView.setLayoutY(y);
         imageView.setRotate(Math.random() * 359);
-        shape = new Circle(5);
     }
 
     public double getRotate() {

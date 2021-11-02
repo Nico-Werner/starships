@@ -2,6 +2,7 @@ package model;
 
 import collider.MyCollider;
 import edu.austral.dissis.starships.vector.Vector2;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class Ship implements MyCollider {
     }
 
     public void move(Vector2 to) {
-        shape.setLayoutX(to.getX());
-        shape.setLayoutY(to.getY());
+        shape.setLayoutX(to.getX() + (100 - ((Rectangle) shape).getWidth())/2);
+        shape.setLayoutY(to.getY() + (100 - ((Rectangle) shape).getHeight())/2);
     }
 }

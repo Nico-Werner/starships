@@ -8,10 +8,7 @@ import lombok.SneakyThrows;
 import model.Asteroid;
 import view.AsteroidView;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class AsteroidController {
     Map<Asteroid, AsteroidView> asteroids = new HashMap<>();
@@ -30,6 +27,7 @@ public class AsteroidController {
         }
 
         asteroids.put(asteroid, new AsteroidView(image, x, y));
+        asteroid.getShape().setRotate(asteroids.get(asteroid).getRotate());
         return asteroids.get(asteroid).getImageView();
     }
 
@@ -45,5 +43,28 @@ public class AsteroidController {
 
     public List<Asteroid> getAsteroids() {
         return asteroids.keySet().stream().toList();
+    }
+
+    public List<ImageView> updateDeaths() {
+        List<ImageView> deaths = new ArrayList<>();
+
+        // remove asteroids that have 0 or less health and add their imageView to the deaths list
+        asteroids.forEach((a, v) -> {
+            if(a.getHealth() <= 0) {
+                deaths.add(v.getImageView());
+                asteroids.remove(a);
+            }
+        });
+
+        return deaths;
+    }
+
+    public void killOutOfBounds(double width, double height) {
+        // set asteroids health to 0 if asteroidView is outside the screen
+        asteroids.forEach((a, v) -> {
+            if(v.getLayoutX() < 0 - a.getHealth()*2 || v.getLayoutX() > width + a.getHealth()*2 || v.getLayoutY() < 0 - a.getHealth()*2 || v.getLayoutY() > height + a.getHealth()*2) {
+                a.setHealth(0.0);
+            }
+        });
     }
 }

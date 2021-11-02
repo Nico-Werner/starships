@@ -4,7 +4,6 @@ import controller.ShipController;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
-import edu.austral.dissis.starships.vector.Vector2;
 import factory.AsteroidFactory;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
@@ -12,10 +11,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import lombok.SneakyThrows;
 import model.Asteroid;
 import model.Ship;
 import strategy.impl.SingleShooting;
@@ -86,13 +83,10 @@ class GameManager {
         ImageLoader imageLoader = new ImageLoader();
         Image image = imageLoader.loadFromResources("starship.gif", 100.0, 100.0);
         ShipView shipView = new ShipView(image, 200, 200);
-        Ship ship = new Ship(200.0, new SingleShooting(), new Rectangle(100, 50));
+        Ship ship = new Ship(200.0, new SingleShooting(), new Rectangle(70, 45));
         ShipController shipController = new ShipController(shipView, ship);
 
         Pane pane = new Pane(shipView.getImageView());
-        //TODO AAaaa
-        ship.getShape().setFill(Color.GREEN);
-        pane.getChildren().add(ship.getShape());
 
         new MainTimer(shipController, new AsteroidController(), context.getKeyTracker(), imageLoader, pane).start();
 
@@ -153,13 +147,6 @@ class MainTimer extends GameTimer {
 
         List<Asteroid> asteroids = asteroidController.getAsteroids();
 
-        for (Asteroid asteroid : asteroids) {
-            if(!pane.getChildren().contains(asteroid.getShape())){
-                asteroid.getShape().setFill(Color.RED);
-                pane.getChildren().add(asteroid.getShape());
-            }
-        }
-
         List<MyCollider> colliders = new ArrayList<>(asteroids);
         colliders.add(shipController.getShip());
         collisionEngine.checkCollisions(colliders);
@@ -167,6 +154,7 @@ class MainTimer extends GameTimer {
 
     private void updateDeaths() {
         pane.getChildren().remove(shipController.updateDeath());
-        // asteroidController.updateDeaths();
+        asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());
+        pane.getChildren().removeAll(asteroidController.updateDeaths());
     }
 }

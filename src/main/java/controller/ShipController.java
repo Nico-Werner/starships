@@ -19,8 +19,6 @@ public class ShipController {
         Vector2 to = from.add(movementVector);
         shipView.move(to);
         ship.move(to);
-        System.out.println(shipView.getLayoutX() + ";" + shipView.getLayoutY());
-        System.out.println(ship.getShape().getLayoutX() + ";" + ship.getShape().getLayoutY());
     }
 
     public void backward(Double movement) {
@@ -33,10 +31,12 @@ public class ShipController {
 
     public void rotateLeft(Double movement) {
         shipView.setRotate(shipView.getRotate() - movement);
+        ship.getShape().setRotate(shipView.getRotate() - movement);
     }
 
     public void rotateRight(Double movement) {
         shipView.setRotate(shipView.getRotate() + movement);
+        ship.getShape().setRotate(shipView.getRotate() + movement);
     }
 
     public ImageView updateDeath() {
