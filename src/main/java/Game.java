@@ -1,5 +1,6 @@
 import collider.MyCollider;
 import controller.AsteroidController;
+import controller.BulletController;
 import controller.ShipController;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
@@ -10,10 +11,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import model.Asteroid;
+import model.Bullet;
 import model.Ship;
 import strategy.impl.SingleShooting;
 import view.ShipView;
@@ -88,7 +89,7 @@ class GameManager {
 
         Pane pane = new Pane(shipView.getImageView());
 
-        new MainTimer(shipController, new AsteroidController(), context.getKeyTracker(), imageLoader, pane).start();
+        new MainTimer(shipController, new AsteroidController(), new BulletController(), context.getKeyTracker(), imageLoader, pane).start();
 
         return pane;
     }
@@ -98,18 +99,20 @@ class GameManager {
 class MainTimer extends GameTimer {
     ShipController shipController;
     AsteroidController asteroidController;
+    BulletController bulletController;
     KeyTracker keyTracker;
     ImageLoader imageLoader;
     Pane pane;
     AsteroidFactory asteroidFactory = new AsteroidFactory();
     CollisionEngine collisionEngine = new CollisionEngine();
 
-    public MainTimer(ShipController shipController, AsteroidController asteroidController, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
+    public MainTimer(ShipController shipController, AsteroidController asteroidController, BulletController bulletController, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
         this.shipController = shipController;
         this.keyTracker = keyTracker;
         this.asteroidController = asteroidController;
         this.imageLoader = imageLoader;
         this.pane = pane;
+        this.bulletController = bulletController;
     }
 
     @Override
@@ -136,18 +139,24 @@ class MainTimer extends GameTimer {
                case DOWN -> shipController.backward(movement);
                case LEFT -> shipController.rotateLeft(movement);
                case RIGHT -> shipController.rotateRight(movement);
-
+               case SPACE -> {
+                   shipController.fire(bulletController);
+                   List<ImageView> imageViews = bulletController.renderBullets(imageLoader);
+                   pane.getChildren().addAll(imageViews);
+               }
                default -> {
                }
             }
 
         });
 
+        bulletController.updatePositions(secondsSinceLastFrame);
         asteroidController.updatePositions(secondsSinceLastFrame);
 
         List<Asteroid> asteroids = asteroidController.getAsteroids();
-
+        List<Bullet> bullets = bulletController.getBullets();
         List<MyCollider> colliders = new ArrayList<>(asteroids);
+        colliders.addAll(bullets);
         colliders.add(shipController.getShip());
         collisionEngine.checkCollisions(colliders);
     }
@@ -156,5 +165,6 @@ class MainTimer extends GameTimer {
         pane.getChildren().remove(shipController.updateDeath());
         asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());
         pane.getChildren().removeAll(asteroidController.updateDeaths());
+        pane.getChildren().removeAll(bulletController.removeDeadBullets(pane.getWidth(), pane.getHeight()));
     }
 }

@@ -33,8 +33,8 @@ public class AsteroidController {
 
     public void updatePositions(Double secondsSinceLastFrame) {
         asteroids.forEach((a, v) -> {
-            Vector2 movementVector = Vector2.vectorFromModule((float) (1/a.getHealth() * 10000 * secondsSinceLastFrame), (float) (Math.toRadians(v.getRotate())));
-            Vector2 from = Vector2.vector((float) v.getLayoutX(), (float) v.getLayoutY());
+            Vector2 movementVector = Vector2.vectorFromModule((1/a.getHealth() * 10000 * secondsSinceLastFrame), (Math.toRadians(v.getRotate())));
+            Vector2 from = Vector2.vector(v.getLayoutX(), v.getLayoutY());
             Vector2 to = from.add(movementVector);
             v.move(to);
             a.move(to);

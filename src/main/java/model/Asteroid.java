@@ -20,6 +20,9 @@ public class Asteroid implements MyCollider {
             Ship ship = (Ship) collider;
             ship.setHealth(ship.getHealth() - health/2);
             health = 0.0;
+        } else if(collider.getClass().equals(Bullet.class)) {
+            Bullet bullet = (Bullet) collider;
+            health = health - bullet.getDamage();
         }
     }
 

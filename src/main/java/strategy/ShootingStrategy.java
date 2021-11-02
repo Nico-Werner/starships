@@ -1,7 +1,7 @@
 package strategy;
 
-import edu.austral.dissis.starships.vector.Vector2;
+import controller.BulletController;
 
 public interface ShootingStrategy {
-    void shoot(Vector2 from);
+    void shoot(BulletController bulletController, double x, double y, double angle);
 }
