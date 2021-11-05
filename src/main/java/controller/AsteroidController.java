@@ -4,6 +4,8 @@ import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Circle;
 import lombok.SneakyThrows;
 import model.Asteroid;
 import view.AsteroidView;
@@ -33,9 +35,12 @@ public class AsteroidController {
 
     public void updatePositions(Double secondsSinceLastFrame) {
         asteroids.forEach((a, v) -> {
-            Vector2 movementVector = Vector2.vectorFromModule((1/a.getHealth() * 10000 * secondsSinceLastFrame), (Math.toRadians(v.getRotate())));
+            Vector2 movementVector = Vector2.vectorFromModule((a.getSpeed() * secondsSinceLastFrame), (Math.toRadians(v.getRotate())));
             Vector2 from = Vector2.vector(v.getLayoutX(), v.getLayoutY());
             Vector2 to = from.add(movementVector);
+            v.getImageView().setFitWidth(a.getHealth());
+            v.getImageView().setFitHeight(a.getHealth());
+            ((Circle) (a.getShape())).setRadius(a.getHealth()/3);
             v.move(to);
             a.move(to);
         });

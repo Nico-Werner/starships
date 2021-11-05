@@ -13,6 +13,7 @@ import lombok.Getter;
 public class Asteroid implements MyCollider {
     Double health;
     Shape shape;
+    double speed;
 
     @Override
     public void handleCollisionWith(MyCollider collider) {
