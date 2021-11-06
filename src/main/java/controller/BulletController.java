@@ -20,7 +20,9 @@ public class BulletController {
     }
 
     @SneakyThrows
-    public List<ImageView> renderBullets(ImageLoader imageLoader) {
+    public List<ImageView> renderBullets() {
+        ImageLoader imageLoader = new ImageLoader();
+
         Image image = imageLoader.loadFromResources("bullet.png", 20, 20);
         List<ImageView> result = new ArrayList<>();
 

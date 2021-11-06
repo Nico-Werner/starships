@@ -1,5 +1,4 @@
 import collider.MyCollider;
-import com.sun.javafx.tk.FontLoader;
 import controller.AsteroidController;
 import controller.BulletController;
 import controller.ShipController;
@@ -14,7 +13,6 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -25,28 +23,28 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import lombok.SneakyThrows;
 import model.Asteroid;
 import model.Bullet;
 import model.Ship;
+import org.jetbrains.annotations.NotNull;
+import player.Player;
 import strategy.impl.SingleShooting;
+import utils.Config;
 import view.ShipView;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Game extends GameApplication {
 
     @Override
-    public WindowSettings setupWindow() {
-        return WindowSettings.fromTitle("Starships!");
+    public @NotNull WindowSettings setupWindow() {
+        return WindowSettings.fromTitle("Starships!").withSize(1920, 1080);
     }
 
     @Override
-    public Parent initRoot(GameContext context) {
+    public Parent initRoot(@NotNull GameContext context) {
         try {
             return new GameManager(this, context).init();
         } catch (IOException e) {
@@ -114,20 +112,27 @@ class GameManager {
     private Parent loadGame() throws IOException {
         ImageLoader imageLoader = new ImageLoader();
 
+        Pane pane = new Pane();
+
         BackgroundImage myBI= new BackgroundImage(imageLoader.loadFromResources("background.png", 1920, 1080),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                 BackgroundSize.DEFAULT);
-
-        Image image = imageLoader.loadFromResources("starship.gif", 100.0, 100.0);
-        ShipView shipView = new ShipView(image, 200, 200);
-        Ship ship = new Ship(200.0, new SingleShooting(), new Rectangle(70, 45));
-        ShipController shipController = new ShipController(shipView, ship);
-
-        Pane pane = new Pane(shipView.getImageView());
-
         pane.setBackground(new Background(myBI));
 
-        new MainTimer(shipController, new AsteroidController(), new BulletController(), context.getKeyTracker(), imageLoader, pane).start();
+        Player[] players = new Player[Config.PLAYERS];
+        for (int i = 0; i < Config.PLAYERS; i++) {
+
+            players[i] = new Player(i, 0, Config.LIVES, Config.PLAYER_SHIPS[i],
+                    Config.PLAYER_KEYS[i][0],
+                    Config.PLAYER_KEYS[i][1],
+                    Config.PLAYER_KEYS[i][2],
+                    Config.PLAYER_KEYS[i][3],
+                    Config.PLAYER_KEYS[i][4]);
+
+            pane.getChildren().add(players[i].getShipController().getShipView().getImageView());
+        }
+
+        new MainTimer(players, new AsteroidController(), new BulletController(), context.getKeyTracker(), imageLoader, pane).start();
 
         return pane;
     }
@@ -213,22 +218,20 @@ class GameManager {
 }
 
 class MainTimer extends GameTimer {
-    ShipController shipController;
+    Player[] players;
     AsteroidController asteroidController;
-    BulletController bulletController;
     KeyTracker keyTracker;
     ImageLoader imageLoader;
     Pane pane;
     AsteroidFactory asteroidFactory = new AsteroidFactory();
     CollisionEngine collisionEngine = new CollisionEngine();
 
-    public MainTimer(ShipController shipController, AsteroidController asteroidController, BulletController bulletController, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
-        this.shipController = shipController;
+    public MainTimer(Player[] players, AsteroidController asteroidController, BulletController bulletController, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
+        this.players = players;
         this.keyTracker = keyTracker;
         this.asteroidController = asteroidController;
         this.imageLoader = imageLoader;
         this.pane = pane;
-        this.bulletController = bulletController;
     }
 
     @Override
@@ -249,38 +252,28 @@ class MainTimer extends GameTimer {
     private void updatePosition(Double secondsSinceLastFrame) {
         double movement = 100 * secondsSinceLastFrame;
 
-        keyTracker.getKeySet().forEach(keyCode -> {
-           switch (keyCode) {
-               case UP -> shipController.forward(movement);
-               case DOWN -> shipController.backward(movement);
-               case LEFT -> shipController.rotateLeft(movement);
-               case RIGHT -> shipController.rotateRight(movement);
-               case SPACE -> {
-                   shipController.fire(bulletController);
-                   List<ImageView> imageViews = bulletController.renderBullets(imageLoader);
-                   pane.getChildren().addAll(imageViews);
-               }
-               default -> {
-               }
-            }
+        for(Player player : players) {
+            player.updateInput(pane, keyTracker, movement);
+            player.getShipController().getBulletController().updatePositions(secondsSinceLastFrame);
+        }
 
-        });
-
-        bulletController.updatePositions(secondsSinceLastFrame);
         asteroidController.updatePositions(secondsSinceLastFrame);
 
         List<Asteroid> asteroids = asteroidController.getAsteroids();
-        List<Bullet> bullets = bulletController.getBullets();
         List<MyCollider> colliders = new ArrayList<>(asteroids);
-        colliders.addAll(bullets);
-        colliders.add(shipController.getShip());
+        for (Player player : players) {
+            colliders.add(player.getShipController().getShip());
+            colliders.addAll(player.getShipController().getBulletController().getBullets());
+        }
         collisionEngine.checkCollisions(colliders);
     }
 
     private void updateDeaths() {
-        pane.getChildren().remove(shipController.updateDeath());
+        for(Player player : players) {
+            pane.getChildren().remove(player.getShipController().updateDeath());
+            pane.getChildren().removeAll(player.getShipController().getBulletController().removeDeadBullets(pane.getWidth(), pane.getHeight()));
+        }
         asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());
         pane.getChildren().removeAll(asteroidController.updateDeaths());
-        pane.getChildren().removeAll(bulletController.removeDeadBullets(pane.getWidth(), pane.getHeight()));
     }
 }

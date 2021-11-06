@@ -12,6 +12,7 @@ import view.ShipView;
 public class ShipController {
     private ShipView shipView;
     private Ship ship;
+    private BulletController bulletController;
 
     public void forward(Double movement) {
         Vector2 movementVector = Vector2.vectorFromModule(movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
@@ -45,6 +46,10 @@ public class ShipController {
     }
 
     public void fire(BulletController bulletController) {
+        ship.fire(bulletController);
+    }
+
+    public void fire() {
         ship.fire(bulletController);
     }
 }
