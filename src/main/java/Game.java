@@ -1,6 +1,7 @@
 import collider.MyCollider;
 import controller.AsteroidController;
 import controller.BulletController;
+import controller.PickupController;
 import controller.ShipController;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
@@ -132,7 +133,7 @@ class GameManager {
             pane.getChildren().add(players[i].getShipController().getShipView().getImageView());
         }
 
-        new MainTimer(players, new AsteroidController(), new BulletController(), context.getKeyTracker(), imageLoader, pane).start();
+        new MainTimer(players, context.getKeyTracker(), imageLoader, pane).start();
 
         return pane;
     }
@@ -219,17 +220,17 @@ class GameManager {
 
 class MainTimer extends GameTimer {
     Player[] players;
-    AsteroidController asteroidController;
+    AsteroidController asteroidController = new AsteroidController();
+    PickupController pickupController = new PickupController();
     KeyTracker keyTracker;
     ImageLoader imageLoader;
     Pane pane;
     AsteroidFactory asteroidFactory = new AsteroidFactory();
     CollisionEngine collisionEngine = new CollisionEngine();
 
-    public MainTimer(Player[] players, AsteroidController asteroidController, BulletController bulletController, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
+    public MainTimer(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
         this.players = players;
         this.keyTracker = keyTracker;
-        this.asteroidController = asteroidController;
         this.imageLoader = imageLoader;
         this.pane = pane;
     }
@@ -239,6 +240,14 @@ class MainTimer extends GameTimer {
         updatePosition(secondsSinceLastFrame);
         updateDeaths();
         spawnAsteroid();
+        spawnPickup();
+    }
+
+    private void spawnPickup() {
+        if(Math.random() * 1000 < 1 && pickupController.getPickups().size() < 5) {
+            ImageView imageView = pickupController.spawnPickup(imageLoader, pane.getWidth(), pane.getHeight());
+            pane.getChildren().add(imageView);
+        }
     }
 
     private void spawnAsteroid() {
@@ -259,8 +268,9 @@ class MainTimer extends GameTimer {
 
         asteroidController.updatePositions(secondsSinceLastFrame);
 
-        List<Asteroid> asteroids = asteroidController.getAsteroids();
-        List<MyCollider> colliders = new ArrayList<>(asteroids);
+        List<MyCollider> colliders = new ArrayList<>();
+        colliders.addAll(asteroidController.getAsteroids());
+        colliders.addAll(pickupController.getPickups());
         for (Player player : players) {
             colliders.add(player.getShipController().getShip());
             colliders.addAll(player.getShipController().getBulletController().getBullets());
@@ -275,5 +285,6 @@ class MainTimer extends GameTimer {
         }
         asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());
         pane.getChildren().removeAll(asteroidController.updateDeaths());
+        pane.getChildren().removeAll(pickupController.getInactive());
     }
 }

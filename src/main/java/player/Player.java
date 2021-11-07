@@ -28,10 +28,10 @@ public class Player {
 
     public void updateInput(Pane pane, KeyTracker keyTracker, double secondsSinceLastFrame) {
         keyTracker.getKeySet().forEach(keyCode -> {
-            if (keyCode == keyForward) shipController.forward(secondsSinceLastFrame);
-            else if (keyCode == keyBackward) shipController.backward(secondsSinceLastFrame);
-            else if (keyCode == keyRotateLeft) shipController.rotateLeft(secondsSinceLastFrame);
-            else if (keyCode == keyRotateRight) shipController.rotateRight(secondsSinceLastFrame);
+            if (keyCode == keyForward) shipController.forward(secondsSinceLastFrame, pane);
+            else if (keyCode == keyBackward) shipController.backward(secondsSinceLastFrame, pane);
+            else if (keyCode == keyRotateLeft) shipController.rotateLeft(secondsSinceLastFrame, pane);
+            else if (keyCode == keyRotateRight) shipController.rotateRight(secondsSinceLastFrame, pane);
             else if (keyCode == keyShoot) {
                 shipController.fire();
                 List<ImageView> imageViews = shipController.getBulletController().renderBullets();

@@ -3,7 +3,6 @@ package utils;
 import controller.BulletController;
 import controller.ShipController;
 import edu.austral.dissis.starships.file.ImageLoader;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Rectangle;
 import model.Ship;
@@ -11,7 +10,6 @@ import strategy.impl.SingleShooting;
 import view.ShipView;
 
 import java.io.IOException;
-import java.util.List;
 
 public class Config {
     private static final ImageLoader imageLoader = new ImageLoader();

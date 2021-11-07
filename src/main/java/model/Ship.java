@@ -30,4 +30,8 @@ public class Ship implements MyCollider {
         shape.setLayoutX(to.getX() + (100 - ((Rectangle) shape).getWidth())/2);
         shape.setLayoutY(to.getY() + (100 - ((Rectangle) shape).getHeight())/2);
     }
+
+    public void heal(int amount) {
+        health += amount;
+    }
 }
