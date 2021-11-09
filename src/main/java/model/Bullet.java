@@ -36,6 +36,7 @@ public class Bullet implements MyCollider {
     @Override
     public void handleCollisionWith(Asteroid asteroid) {
         speed = 0;
+        if(asteroid.getHealth() < 0) shooter.addPoints(damage);
         shooter.addPoints(damage);
     }
 

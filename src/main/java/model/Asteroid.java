@@ -6,11 +6,12 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+
+import java.io.Serializable;
 
 @AllArgsConstructor
 @Data
-public class Asteroid implements MyCollider {
+public class Asteroid implements MyCollider, Serializable {
     Double health;
     Shape shape;
     double speed;

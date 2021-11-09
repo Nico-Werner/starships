@@ -2,17 +2,19 @@ package model;
 
 import collider.MyCollider;
 import controller.BulletController;
+import dto.ShipDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import player.Player;
 import strategy.ShootingStrategy;
 
 @AllArgsConstructor
 @Data
+@Builder
 public class Ship implements MyCollider {
     private Double health;
     private ShootingStrategy shootingStrategy;
@@ -55,5 +57,16 @@ public class Ship implements MyCollider {
     @Override
     public void handleCollisionWith(Pickup pickup) {
 
+    }
+
+    public ShipDTO toDTO() {
+        return ShipDTO.builder()
+                .health(health)
+                .shootingStrategy(shootingStrategy)
+                .speed(speed)
+                .posX(shape.getLayoutX())
+                .posY(shape.getLayoutY())
+                .angle(shape.getRotate())
+                .build();
     }
 }

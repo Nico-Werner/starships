@@ -1,6 +1,7 @@
 import collider.MyCollider;
 import controller.AsteroidController;
 import controller.PickupController;
+import dto.PlayerDTO;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
@@ -12,7 +13,6 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -25,7 +25,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Asteroid;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import player.Player;
+import serializer.GameSerializer;
+import serializer.GameState;
 import utils.Config;
 
 import java.io.IOException;
@@ -65,12 +68,11 @@ class GameManager {
     boolean isIntro = true;
 
     Parent init() throws IOException {
-        Parent parent = isIntro ? loadIntro() : loadGame();
 
-        return parent;
+        return isIntro ? loadIntro(null) : loadGame(null);
     }
 
-    private Parent loadIntro() throws IOException {
+    private Parent loadIntro(@Nullable GameState gameState) throws IOException {
         Pane pane = new Pane();
         pane.setPrefSize(1920, 1080);
 
@@ -89,15 +91,36 @@ class GameManager {
         resumeGame.setOnMouseClicked(event -> {
             isIntro = !isIntro;
             try {
-                rootSetter.setRoot(init());
+                if(gameState == null) {
+                    rootSetter.setRoot(init());
+                }
+                rootSetter.setRoot(loadGame(GameSerializer.loadGame()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
 
+        MenuItem save = new MenuItem("SAVE GAME");
+        save.setOnMouseClicked(event -> {
+                    GameSerializer.saveGame(gameState);
+                });
+
+
+        //TODO
+        MenuItem newGame = new MenuItem("NEW GAME");
+        newGame.setOnMouseClicked(event -> {
+            isIntro = !isIntro;
+            try {
+                rootSetter.setRoot(loadGame(null));
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }});
+
         menu = new MenuBox("STARSHIPS",
                 resumeGame,
-                new MenuItem("NEW GAME"),
+                newGame,
+                save,
                 exit);
 
         pane.getChildren().add(menu);
@@ -106,7 +129,7 @@ class GameManager {
     }
 
 
-    private Parent loadGame() throws IOException {
+    private Parent loadGame(@Nullable GameState state) throws IOException {
         ImageLoader imageLoader = new ImageLoader();
 
         Pane pane = new Pane();
@@ -116,36 +139,65 @@ class GameManager {
                 BackgroundSize.DEFAULT);
         pane.setBackground(new Background(myBI));
 
-        Player[] players = new Player[Config.PLAYERS];
-        for (int i = 0; i < Config.PLAYERS; i++) {
+        if(state == null) {
+            Player[] players = new Player[Config.PLAYERS];
+            for (int i = 0; i < Config.PLAYERS; i++) {
 
-            players[i] = new Player(i, 0, Config.LIVES, Config.PLAYER_SHIPS[i],
-                    Config.PLAYER_KEYS[i][0],
-                    Config.PLAYER_KEYS[i][1],
-                    Config.PLAYER_KEYS[i][2],
-                    Config.PLAYER_KEYS[i][3],
-                    Config.PLAYER_KEYS[i][4]);
+                players[i] = new Player(i, 0, Config.LIVES, Config.PLAYER_SHIPS[i],
+                        Config.PLAYER_KEYS[i][0],
+                        Config.PLAYER_KEYS[i][1],
+                        Config.PLAYER_KEYS[i][2],
+                        Config.PLAYER_KEYS[i][3],
+                        Config.PLAYER_KEYS[i][4]);
 
-            pane.getChildren().add(players[i].getShipController().getShipView().getImageView());
-            pane.getChildren().add(players[i].getShipController().getShipView().getHealthView());
-            pane.getChildren().add(players[i].getShipController().getShipView().getPoints());
-        }
-
-        MainTimer mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane);
-        mainTimer.start();
-
-        pane.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.P) {
-                isIntro = !isIntro;
-                try {
-                    mainTimer.stop();
-                    rootSetter.setRoot(init());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                pane.getChildren().add(players[i].getShipController().getShipView().getImageView());
+                pane.getChildren().add(players[i].getShipController().getShipView().getHealthView());
+                pane.getChildren().add(players[i].getShipController().getShipView().getPoints());
             }
 
-        });
+            AsteroidController asteroidController = new AsteroidController();
+            PickupController pickupController = new PickupController();
+            MainTimer mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
+            mainTimer.start();
+
+            pane.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.P) {
+                    isIntro = !isIntro;
+                    try {
+                        mainTimer.stop();
+                        rootSetter.setRoot(loadIntro(new GameState(List.of(players), asteroidController.getAsteroids(), pickupController.getPickups())));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            });
+        } else {
+            List<Player> players = state.getPlayers().stream().map(PlayerDTO::toPlayer).toList();
+            for (int i = 0; i < players.size(); i++) {
+                pane.getChildren().add(players.get(i).getShipController().getShipView().getImageView());
+                pane.getChildren().add(players.get(i).getShipController().getShipView().getHealthView());
+                pane.getChildren().add(players.get(i).getShipController().getShipView().getPoints());
+            }
+
+            AsteroidController asteroidController = new AsteroidController();
+            PickupController pickupController = new PickupController();
+            MainTimer mainTimer = new MainTimer(players.toArray(Player[]::new), context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
+            mainTimer.start();
+
+            pane.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.P) {
+                    isIntro = !isIntro;
+                    try {
+                        mainTimer.stop();
+                        rootSetter.setRoot(loadIntro(new GameState(players, asteroidController.getAsteroids(), pickupController.getPickups())));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            });
+        }
 
         return pane;
     }
@@ -232,19 +284,21 @@ class GameManager {
 
 class MainTimer extends GameTimer {
     Player[] players;
-    AsteroidController asteroidController = new AsteroidController();
-    PickupController pickupController = new PickupController();
+    AsteroidController asteroidController;
+    PickupController pickupController;
     KeyTracker keyTracker;
     ImageLoader imageLoader;
     Pane pane;
     AsteroidFactory asteroidFactory = new AsteroidFactory();
     CollisionEngine collisionEngine = new CollisionEngine();
 
-    public MainTimer(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane) {
+    public MainTimer(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane, AsteroidController asteroidController, PickupController pickupController) {
         this.players = players;
         this.keyTracker = keyTracker;
         this.imageLoader = imageLoader;
         this.pane = pane;
+        this.asteroidController = asteroidController;
+        this.pickupController = pickupController;
     }
 
     @Override

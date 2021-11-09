@@ -1,17 +1,22 @@
 package controller;
 
+import dto.ShipControllerDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import model.Ship;
 import player.Player;
 import view.ShipView;
 
+import java.io.Serializable;
+
 @AllArgsConstructor
 @Getter
-public class ShipController {
+@Builder
+public class ShipController implements Serializable {
     private ShipView shipView;
     private Ship ship;
     private BulletController bulletController;
@@ -66,5 +71,12 @@ public class ShipController {
 
     public void updateHealth() {
         shipView.updateHealth(ship.getHealth());
+    }
+
+    public ShipControllerDTO toDTO() {
+        return ShipControllerDTO.builder()
+                .imageName("starship.gif")
+                .ship(ship.toDTO())
+                .build();
     }
 }

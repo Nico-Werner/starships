@@ -2,7 +2,6 @@ package strategy.impl;
 
 import controller.BulletController;
 import javafx.scene.shape.Circle;
-import lombok.Getter;
 import model.Bullet;
 import player.Player;
 import strategy.ShootingStrategy;
