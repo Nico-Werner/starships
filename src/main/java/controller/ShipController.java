@@ -45,6 +45,7 @@ public class ShipController {
     public ImageView updateDeath() {
         if(ship.getHealth() <= 0) {
             shipView.getHealthView().setVisible(false);
+            shipView.getPoints().setVisible(false);
             return shipView.getImageView();
         }
         else return null;

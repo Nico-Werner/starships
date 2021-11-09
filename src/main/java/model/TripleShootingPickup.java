@@ -30,20 +30,22 @@ public class TripleShootingPickup implements Pickup {
 
     @Override
     public void handleCollisionWith(@NotNull MyCollider collider) {
-        if(!active) return;
-        if (collider instanceof Ship) {
-            final Ship ship = (Ship) collider;
-            TripleShooting tripleShooting = new TripleShooting();
-            tripleShooting.setCooldown(ship.getShootingStrategy().getCooldown());
-            ship.setShootingStrategy(tripleShooting);
-            active = false;
+        collider.handleCollisionWith(this);
+    }
 
-            new Timer().schedule(new TimerTask() {
+    @Override
+    public void handleCollisionWith(Ship ship) {
+        if(!active) return;
+        TripleShooting tripleShooting = new TripleShooting();
+        tripleShooting.setCooldown(ship.getShootingStrategy().getCooldown());
+        ship.setShootingStrategy(tripleShooting);
+        active = false;
+
+        new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     ship.setShootingStrategy(new SingleShooting());
                 }
             } , 10000);
-        }
     }
 }

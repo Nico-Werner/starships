@@ -29,17 +29,21 @@ public class RapidFirePickup implements Pickup {
 
     @Override
     public void handleCollisionWith(@NotNull MyCollider collider) {
-        if(!active) return;
-        if (collider instanceof Ship) {
-            ((Ship) collider).getShootingStrategy().setCooldown(50);
-            active = false;
+        collider.handleCollisionWith(this);
+    }
 
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    ((Ship) collider).getShootingStrategy().setCooldown(500);
-                }
-            } , 10000);
-        }
+
+    @Override
+    public void handleCollisionWith(Ship ship) {
+        if(!active) return;
+        ship.getShootingStrategy().setCooldown(50);
+        active = false;
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                ship.getShootingStrategy().setCooldown(500);
+            }
+        } , 10000);
     }
 }

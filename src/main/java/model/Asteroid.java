@@ -17,18 +17,32 @@ public class Asteroid implements MyCollider {
 
     @Override
     public void handleCollisionWith(MyCollider collider) {
-        if(collider.getClass().equals(Ship.class)) {
-            Ship ship = (Ship) collider;
-            ship.setHealth(ship.getHealth() - health/2);
-            health = 0.0;
-        } else if(collider.getClass().equals(Bullet.class)) {
-            Bullet bullet = (Bullet) collider;
-            health = health - bullet.getDamage();
-        }
+        collider.handleCollisionWith(this);
     }
 
     public void move(Vector2 to) {
         ((Circle) shape).setCenterX(to.getX() + health/2);
         ((Circle) shape).setCenterY(to.getY() + health/2);
+    }
+
+    @Override
+    public void handleCollisionWith(Asteroid asteroid) {
+
+    }
+
+    @Override
+    public void handleCollisionWith(Ship ship) {
+        ship.setHealth(ship.getHealth() - health/2);
+        health = 0.0;
+    }
+
+    @Override
+    public void handleCollisionWith(Bullet bullet) {
+        health = health - bullet.getDamage();
+    }
+
+    @Override
+    public void handleCollisionWith(Pickup pickup) {
+
     }
 }

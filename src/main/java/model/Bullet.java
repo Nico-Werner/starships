@@ -24,14 +24,33 @@ public class Bullet implements MyCollider {
 
     @Override
     public void handleCollisionWith(MyCollider collider) {
-        if(collider instanceof Asteroid) {
-            speed = 0;
-            shooter.addPoints(damage);
-        }
+        // double dispatch
+        collider.handleCollisionWith(this);
     }
 
     public void move(Vector2 to) {
         shape.setLayoutX(to.getX());
         shape.setLayoutY(to.getY());
+    }
+
+    @Override
+    public void handleCollisionWith(Asteroid asteroid) {
+        speed = 0;
+        shooter.addPoints(damage);
+    }
+
+    @Override
+    public void handleCollisionWith(Ship ship) {
+
+    }
+
+    @Override
+    public void handleCollisionWith(Bullet bullet) {
+
+    }
+
+    @Override
+    public void handleCollisionWith(Pickup pickup) {
+
     }
 }

@@ -11,6 +11,8 @@ import javafx.scene.Parent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -65,15 +67,6 @@ class GameManager {
     Parent init() throws IOException {
         Parent parent = isIntro ? loadIntro() : loadGame();
 
-        parent.setOnMouseClicked(event -> {
-            isIntro = !isIntro;
-            try {
-                rootSetter.setRoot(init());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
         return parent;
     }
 
@@ -92,8 +85,18 @@ class GameManager {
         MenuItem exit = new MenuItem("EXIT");
         exit.setOnMouseClicked(event -> System.exit(0));
 
+        MenuItem resumeGame = new MenuItem("RESUME GAME");
+        resumeGame.setOnMouseClicked(event -> {
+            isIntro = !isIntro;
+            try {
+                rootSetter.setRoot(init());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
         menu = new MenuBox("STARSHIPS",
-                new MenuItem("RESUME GAME"),
+                resumeGame,
                 new MenuItem("NEW GAME"),
                 exit);
 
@@ -128,7 +131,21 @@ class GameManager {
             pane.getChildren().add(players[i].getShipController().getShipView().getPoints());
         }
 
-        new MainTimer(players, context.getKeyTracker(), imageLoader, pane).start();
+        MainTimer mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane);
+        mainTimer.start();
+
+        pane.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.P) {
+                isIntro = !isIntro;
+                try {
+                    mainTimer.stop();
+                    rootSetter.setRoot(init());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
 
         return pane;
     }
@@ -232,6 +249,7 @@ class MainTimer extends GameTimer {
 
     @Override
     public void nextFrame(double secondsSinceLastFrame) {
+        pane.requestFocus();
         updatePosition(secondsSinceLastFrame);
         updateHealths();
         updateDeaths();

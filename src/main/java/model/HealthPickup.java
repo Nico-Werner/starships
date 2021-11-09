@@ -28,12 +28,15 @@ public class HealthPickup implements Pickup {
 
     @Override
     public void handleCollisionWith(@NotNull MyCollider collider) {
+        collider.handleCollisionWith(this);
+    }
+
+    @Override
+    public void handleCollisionWith(Ship ship) {
         if(!active) return;
-        if(collider instanceof Ship) {
-            Ship ship = (Ship) collider;
-            if(ship.getHealth() >= 150) ship.setHealth(200.0);
-            else ship.heal(50);
-            active = false;
-        }
+
+        if(ship.getHealth() >= 150) ship.setHealth(200.0);
+        else ship.heal(50);
+        active = false;
     }
 }

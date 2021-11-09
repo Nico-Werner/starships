@@ -25,7 +25,7 @@ public class Ship implements MyCollider {
 
     @Override
     public void handleCollisionWith(MyCollider collider) {
-
+        collider.handleCollisionWith(this);
     }
 
     public void move(Vector2 to) {
@@ -35,5 +35,25 @@ public class Ship implements MyCollider {
 
     public void heal(int amount) {
         health += amount;
+    }
+
+    @Override
+    public void handleCollisionWith(Asteroid asteroid) {
+
+    }
+
+    @Override
+    public void handleCollisionWith(Ship ship) {
+
+    }
+
+    @Override
+    public void handleCollisionWith(Bullet bullet) {
+
+    }
+
+    @Override
+    public void handleCollisionWith(Pickup pickup) {
+
     }
 }

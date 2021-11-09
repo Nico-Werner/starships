@@ -30,18 +30,20 @@ public class SpeedPickup implements Pickup {
 
     @Override
     public void handleCollisionWith(@NotNull MyCollider collider) {
-        if(!active) return;
-        if (collider instanceof Ship) {
-            final Ship ship = (Ship) collider;
-            ship.setSpeed(ship.getSpeed() * 2);
-            active = false;
+        collider.handleCollisionWith(this);
+    }
 
-            new Timer().schedule(new TimerTask() {
+    @Override
+    public void handleCollisionWith(Ship ship) {
+        if(!active) return;
+        ship.setSpeed(ship.getSpeed() * 2);
+        active = false;
+
+        new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                     ship.setSpeed(ship.getSpeed() / 2);
                 }
             } , 10000);
-        }
     }
 }

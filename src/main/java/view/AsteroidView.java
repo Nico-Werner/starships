@@ -3,8 +3,6 @@ package view;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Shape;
 import lombok.Data;
 
 @Data
