@@ -22,7 +22,7 @@ public class Config {
 
     static {
         try {
-            PLAYER_SHIPS = new ShipController[]{new ShipController(new ShipView(imageLoader.loadFromResources("starship.gif", 100, 100), 200, 200), new Ship(200.0, new SingleShooting(), new Rectangle(70, 45)), new BulletController())};
+            PLAYER_SHIPS = new ShipController[]{new ShipController(new ShipView(imageLoader.loadFromResources("starship.gif", 100, 100), 200, 200), new Ship(200.0, new SingleShooting(), new Rectangle(70, 45), 100), new BulletController())};
         } catch (IOException e) {
             e.printStackTrace();
         }

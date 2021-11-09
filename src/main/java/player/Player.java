@@ -30,13 +30,22 @@ public class Player {
         keyTracker.getKeySet().forEach(keyCode -> {
             if (keyCode == keyForward) shipController.forward(secondsSinceLastFrame, pane);
             else if (keyCode == keyBackward) shipController.backward(secondsSinceLastFrame, pane);
-            else if (keyCode == keyRotateLeft) shipController.rotateLeft(secondsSinceLastFrame, pane);
-            else if (keyCode == keyRotateRight) shipController.rotateRight(secondsSinceLastFrame, pane);
+            else if (keyCode == keyRotateLeft) shipController.rotateLeft(secondsSinceLastFrame);
+            else if (keyCode == keyRotateRight) shipController.rotateRight(secondsSinceLastFrame);
             else if (keyCode == keyShoot) {
-                shipController.fire();
+                shipController.fire(this);
                 List<ImageView> imageViews = shipController.getBulletController().renderBullets();
                 pane.getChildren().addAll(imageViews);
             }
         });
+    }
+
+    public void addPoints(double points) {
+        score += points;
+        updatePoints();
+    }
+
+    public void updatePoints() {
+        shipController.getShipView().updatePoints(score);
     }
 }

@@ -6,6 +6,7 @@ import javafx.scene.layout.Pane;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import model.Ship;
+import player.Player;
 import view.ShipView;
 
 @AllArgsConstructor
@@ -15,39 +16,42 @@ public class ShipController {
     private Ship ship;
     private BulletController bulletController;
 
-    public void forward(Double movement, Pane pane) {
+    public void forward(Double secondsSinceLastFrame, Pane pane) {
+        double movement = secondsSinceLastFrame * ship.getSpeed();
         Vector2 movementVector = Vector2.vectorFromModule(movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
         Vector2 from = Vector2.vector((float) shipView.getLayoutX(), (float) shipView.getLayoutY());
         moveShip(pane, movementVector, from);
     }
 
-    public void backward(Double movement, Pane pane) {
+    public void backward(Double secondsSinceLastFrame, Pane pane) {
+        double movement = secondsSinceLastFrame * ship.getSpeed();
         Vector2 movementVector = Vector2.vectorFromModule(-movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
         Vector2 from = Vector2.vector(shipView.getLayoutX(), shipView.getLayoutY());
         moveShip(pane, movementVector, from);
     }
 
-    public void rotateLeft(Double movement, Pane pane) {
+    public void rotateLeft(Double secondsSinceLastFrame) {
+        double movement = secondsSinceLastFrame * ship.getSpeed();
         shipView.setRotate(shipView.getRotate() - movement);
         ship.getShape().setRotate(shipView.getRotate() - movement);
     }
 
-    public void rotateRight(Double movement, Pane pane) {
+    public void rotateRight(Double secondsSinceLastFrame) {
+        double movement = secondsSinceLastFrame * ship.getSpeed();
         shipView.setRotate(shipView.getRotate() + movement);
         ship.getShape().setRotate(shipView.getRotate() + movement);
     }
 
     public ImageView updateDeath() {
-        if(ship.getHealth() <= 0) return shipView.getImageView();
+        if(ship.getHealth() <= 0) {
+            shipView.getHealthView().setVisible(false);
+            return shipView.getImageView();
+        }
         else return null;
     }
 
-    public void fire(BulletController bulletController) {
-        ship.fire(bulletController);
-    }
-
-    public void fire() {
-        ship.fire(bulletController);
+    public void fire(Player shooter) {
+        ship.fire(bulletController, shooter);
     }
 
     private void moveShip(Pane pane, Vector2 movementVector, Vector2 from) {
@@ -57,5 +61,9 @@ public class ShipController {
             shipView.move(to);
             ship.move(to);
         }
+    }
+
+    public void updateHealth() {
+        shipView.updateHealth(ship.getHealth());
     }
 }

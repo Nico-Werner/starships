@@ -5,18 +5,17 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import strategy.impl.SingleShooting;
-import strategy.impl.TripleShooting;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 @Getter
-public class TripleShootingPickup implements Pickup {
+public class SpeedPickup implements Pickup {
+
     boolean active = true;
     Shape shape = new Rectangle(50, 50);
 
-    public TripleShootingPickup(int xPos, int yPos) {
+    public SpeedPickup(int xPos, int yPos) {
         shape.setLayoutX(xPos);
         shape.setLayoutY(yPos);
 
@@ -28,20 +27,19 @@ public class TripleShootingPickup implements Pickup {
         } , 10000);
     }
 
+
     @Override
     public void handleCollisionWith(@NotNull MyCollider collider) {
         if(!active) return;
         if (collider instanceof Ship) {
             final Ship ship = (Ship) collider;
-            TripleShooting tripleShooting = new TripleShooting();
-            tripleShooting.setCooldown(ship.getShootingStrategy().getCooldown());
-            ship.setShootingStrategy(tripleShooting);
+            ship.setSpeed(ship.getSpeed() * 2);
             active = false;
 
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    ship.setShootingStrategy(new SingleShooting());
+                    ship.setSpeed(ship.getSpeed() / 2);
                 }
             } , 10000);
         }

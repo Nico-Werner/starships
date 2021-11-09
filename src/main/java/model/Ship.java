@@ -8,6 +8,7 @@ import javafx.scene.shape.Shape;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import player.Player;
 import strategy.ShootingStrategy;
 
 @AllArgsConstructor
@@ -16,9 +17,10 @@ public class Ship implements MyCollider {
     private Double health;
     private ShootingStrategy shootingStrategy;
     private Shape shape;
+    private double speed;
 
-    public void fire(BulletController bulletController) {
-        shootingStrategy.shoot(bulletController, shape.getLayoutX() + ((Rectangle) shape).getWidth()/2 , shape.getLayoutY() + ((Rectangle) shape).getHeight()/2, shape.getRotate());
+    public void fire(BulletController bulletController, Player shooter) {
+        shootingStrategy.shoot(shooter, bulletController, shape.getLayoutX() + ((Rectangle) shape).getWidth()/2 , shape.getLayoutY() + ((Rectangle) shape).getHeight()/2, shape.getRotate());
     }
 
     @Override

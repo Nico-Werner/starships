@@ -4,9 +4,7 @@ import edu.austral.dissis.starships.file.ImageLoader;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import lombok.SneakyThrows;
-import model.HealthPickup;
-import model.Pickup;
-import model.TripleShootingPickup;
+import model.*;
 import view.PickupView;
 
 import java.util.*;
@@ -18,20 +16,39 @@ public class PickupController {
     public ImageView spawnPickup(ImageLoader imageLoader, double x, double y) {
         Random random = new Random();
 
-        if(random.nextBoolean()){
-            Image image = imageLoader.loadFromResources("health.png", 50, 50);
-            int xPos = random.nextInt((int) x - 50);
-            int yPos = random.nextInt((int) y - 50);
-            PickupView pickupView = new PickupView(image, xPos, yPos);
-            pickups.put(new HealthPickup(xPos, yPos), pickupView);
-            return pickupView.getImageView();
-        } else {
-            Image image = imageLoader.loadFromResources("triple-shot.png", 50, 50);
-            int xPos = random.nextInt((int) x - 50);
-            int yPos = random.nextInt((int) y - 50);
-            PickupView pickupView = new PickupView(image, xPos, yPos);
-            pickups.put(new TripleShootingPickup(xPos, yPos), pickupView);
-            return pickupView.getImageView();
+        switch (random.nextInt(4)) {
+            case 0 -> {
+                Image image = imageLoader.loadFromResources("health.png", 50, 50);
+                int xPos = random.nextInt((int) x - 50);
+                int yPos = random.nextInt((int) y - 50);
+                PickupView pickupView = new PickupView(image, xPos, yPos);
+                pickups.put(new HealthPickup(xPos, yPos), pickupView);
+                return pickupView.getImageView();
+            }
+            case 1 -> {
+                Image image = imageLoader.loadFromResources("triple-shot.png", 50, 50);
+                int xPos = random.nextInt((int) x - 50);
+                int yPos = random.nextInt((int) y - 50);
+                PickupView pickupView = new PickupView(image, xPos, yPos);
+                pickups.put(new TripleShootingPickup(xPos, yPos), pickupView);
+                return pickupView.getImageView();
+            }
+            case 2 -> {
+                Image image = imageLoader.loadFromResources("rapid-fire.png", 50, 50);
+                int xPos = random.nextInt((int) x - 50);
+                int yPos = random.nextInt((int) y - 50);
+                PickupView pickupView = new PickupView(image, xPos, yPos);
+                pickups.put(new RapidFirePickup(xPos, yPos), pickupView);
+                return pickupView.getImageView();
+            }
+            default -> {
+                Image image = imageLoader.loadFromResources("speed.png", 50, 50);
+                int xPos = random.nextInt((int) x - 50);
+                int yPos = random.nextInt((int) y - 50);
+                PickupView pickupView = new PickupView(image, xPos, yPos);
+                pickups.put(new SpeedPickup(xPos, yPos), pickupView);
+                return pickupView.getImageView();
+            }
         }
     }
 

@@ -1,8 +1,6 @@
 import collider.MyCollider;
 import controller.AsteroidController;
-import controller.BulletController;
 import controller.PickupController;
-import controller.ShipController;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
@@ -13,7 +11,6 @@ import javafx.scene.Parent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -25,13 +22,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import model.Asteroid;
-import model.Bullet;
-import model.Ship;
 import org.jetbrains.annotations.NotNull;
 import player.Player;
-import strategy.impl.SingleShooting;
 import utils.Config;
-import view.ShipView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,6 +124,8 @@ class GameManager {
                     Config.PLAYER_KEYS[i][4]);
 
             pane.getChildren().add(players[i].getShipController().getShipView().getImageView());
+            pane.getChildren().add(players[i].getShipController().getShipView().getHealthView());
+            pane.getChildren().add(players[i].getShipController().getShipView().getPoints());
         }
 
         new MainTimer(players, context.getKeyTracker(), imageLoader, pane).start();
@@ -238,13 +233,20 @@ class MainTimer extends GameTimer {
     @Override
     public void nextFrame(double secondsSinceLastFrame) {
         updatePosition(secondsSinceLastFrame);
+        updateHealths();
         updateDeaths();
         spawnAsteroid();
         spawnPickup();
     }
 
+    private void updateHealths() {
+        for (Player player : players) {
+            player.getShipController().updateHealth();
+        }
+    }
+
     private void spawnPickup() {
-        if(Math.random() * 1000 < 1 && pickupController.getPickups().size() < 5) {
+        if(Math.random() * 1000 < 3 && pickupController.getPickups().size() < 5) {
             ImageView imageView = pickupController.spawnPickup(imageLoader, pane.getWidth(), pane.getHeight());
             pane.getChildren().add(imageView);
         }
@@ -259,10 +261,9 @@ class MainTimer extends GameTimer {
     }
 
     private void updatePosition(Double secondsSinceLastFrame) {
-        double movement = 100 * secondsSinceLastFrame;
 
         for(Player player : players) {
-            player.updateInput(pane, keyTracker, movement);
+            player.updateInput(pane, keyTracker, secondsSinceLastFrame);
             player.getShipController().getBulletController().updatePositions(secondsSinceLastFrame);
         }
 
