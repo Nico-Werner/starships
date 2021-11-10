@@ -92,6 +92,19 @@ class GameManager {
         MenuItem exit = new MenuItem("EXIT");
         exit.setOnMouseClicked(event -> System.exit(0));
 
+        MenuItem loadSaved = new MenuItem("LOAD GAME");
+        loadSaved.setOnMouseClicked(event -> {
+            isIntro = !isIntro;
+            try {
+                if(gameState == null) {
+                    rootSetter.setRoot(init());
+                }
+                rootSetter.setRoot(loadGame(GameSerializer.loadGame()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
         MenuItem resumeGame = new MenuItem("RESUME GAME");
         resumeGame.setOnMouseClicked(event -> {
             isIntro = !isIntro;
@@ -99,7 +112,7 @@ class GameManager {
                 if(gameState == null) {
                     rootSetter.setRoot(init());
                 }
-                rootSetter.setRoot(loadGame(GameSerializer.loadGame()));
+                rootSetter.setRoot(loadGame(gameState));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -120,6 +133,7 @@ class GameManager {
 
         menu = new MenuBox("STARSHIPS",
                 resumeGame,
+                loadSaved,
                 newGame,
                 save,
                 exit);
@@ -171,6 +185,7 @@ class GameManager {
                     isIntro = !isIntro;
                     try {
                         mainTimer.stop();
+                        mainTimer.setPaused(true);
                         rootSetter.setRoot(loadIntro(new GameState(List.of(players), asteroidController.getAsteroids(), pickupController.getPickups())));
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -184,8 +199,6 @@ class GameManager {
                 pane.getChildren().add(player.getShipController().getShipView().getImageView());
                 pane.getChildren().add(player.getShipController().getShipView().getHealthView());
                 pane.getChildren().add(player.getShipController().getShipView().getPoints());
-
-                //TODO bullets keep moving when paused
                 pane.getChildren().addAll(player.getShipController().getBulletController().renderBullets());
             }
 
@@ -205,6 +218,7 @@ class GameManager {
                     isIntro = !isIntro;
                     try {
                         mainTimer.stop();
+                        mainTimer.setPaused(true);
                         rootSetter.setRoot(loadIntro(new GameState(players, asteroidController.getAsteroids(), pickupController.getPickups())));
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -308,6 +322,8 @@ class MainTimer extends GameTimer {
     AsteroidFactory asteroidFactory = new AsteroidFactory();
     CollisionEngine collisionEngine = new CollisionEngine();
 
+    boolean paused = false;
+
     public MainTimer(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane, AsteroidController asteroidController, PickupController pickupController) {
         this.players = players;
         this.keyTracker = keyTracker;
@@ -319,6 +335,10 @@ class MainTimer extends GameTimer {
 
     @Override
     public void nextFrame(double secondsSinceLastFrame) {
+        if(paused) {
+            secondsSinceLastFrame = 0;
+            paused = false;
+        }
         pane.requestFocus();
         updatePosition(secondsSinceLastFrame);
         updateHealths();

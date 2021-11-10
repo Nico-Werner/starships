@@ -6,8 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import model.Ship;
 import strategy.ShootingStrategy;
+import strategy.impl.SingleShooting;
 
 import java.io.Serializable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Data
 @Builder
@@ -24,11 +27,21 @@ public class ShipDTO implements Serializable {
         shape.setLayoutX(posX);
         shape.setLayoutY(posY);
         shape.setRotate(angle);
-        return Ship.builder()
+
+        Ship ship = Ship.builder()
                 .health(health)
                 .shape(shape)
                 .speed(speed)
                 .shootingStrategy(shootingStrategy)
                 .build();
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                ship.setShootingStrategy(new SingleShooting());
+            }
+        } , 5000);
+
+        return ship;
     }
 }
