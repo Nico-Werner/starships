@@ -16,6 +16,7 @@ import java.io.Serializable;
 public class ShipControllerDTO implements Serializable {
     private String imageName;
     private ShipDTO ship;
+    private BulletControllerDTO bulletController;
 
     @SneakyThrows
     public ShipController toShipController() {
@@ -25,7 +26,7 @@ public class ShipControllerDTO implements Serializable {
         return ShipController.builder()
                 .shipView(shipView)
                 .ship(ship.toShip())
-                .bulletController(new BulletController())
+                .bulletController(bulletController.toBulletController())
                 .build();
     }
 }

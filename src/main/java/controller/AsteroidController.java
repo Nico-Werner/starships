@@ -12,7 +12,23 @@ import view.AsteroidView;
 import java.util.*;
 
 public class AsteroidController {
-    Map<Asteroid, AsteroidView> asteroids = new HashMap<>();
+    List<Asteroid> asteroids = new ArrayList<>();
+    List<AsteroidView> asteroidViews = new ArrayList<>();
+
+    public AsteroidController() {}
+
+    @SneakyThrows
+    public AsteroidController(List<Asteroid> asteroids) {
+        ImageLoader imageLoader = new ImageLoader();
+        for (int i = 0; i < asteroids.size(); i++) {
+            Asteroid asteroid = asteroids.get(i);
+            Image image = imageLoader.loadFromResources("asteroid.png", asteroid.getHealth(), asteroid.getHealth());
+            AsteroidView asteroidView = new AsteroidView(image, ((Circle) asteroid.getShape()).getCenterX() - asteroid.getHealth()/2, ((Circle) asteroid.getShape()).getCenterY() - asteroid.getHealth()/2);
+            asteroidView.getImageView().setRotate(asteroid.getShape().getRotate());
+            asteroidViews.add(i, asteroidView);
+        }
+        this.asteroids = asteroids;
+    }
 
     @SneakyThrows
     public ImageView spawnAsteroid(Asteroid asteroid, ImageLoader imageLoader, double x, double y) {
@@ -27,13 +43,17 @@ public class AsteroidController {
             x = random.nextInt((int) x);
         }
 
-        asteroids.put(asteroid, new AsteroidView(image, x, y));
-        asteroid.getShape().setRotate(asteroids.get(asteroid).getRotate());
-        return asteroids.get(asteroid).getImageView();
+        asteroids.add(asteroid);
+        AsteroidView asteroidView = new AsteroidView(image, x, y);
+        asteroidViews.add(asteroidView);
+        asteroid.getShape().setRotate(asteroidView.getRotate());
+        return asteroidView.getImageView();
     }
 
     public void updatePositions(Double secondsSinceLastFrame) {
-        asteroids.forEach((a, v) -> {
+        for (int i = 0; i < asteroids.size(); i++) {
+            Asteroid a = asteroids.get(i);
+            AsteroidView v = asteroidViews.get(i);
             Vector2 movementVector = Vector2.vectorFromModule((a.getSpeed() * secondsSinceLastFrame), (Math.toRadians(v.getRotate())));
             Vector2 from = Vector2.vector(v.getLayoutX(), v.getLayoutY());
             Vector2 to = from.add(movementVector);
@@ -42,33 +62,42 @@ public class AsteroidController {
             ((Circle) (a.getShape())).setRadius(a.getHealth()/3);
             v.move(to);
             a.move(to);
-        });
+        }
     }
 
     public List<Asteroid> getAsteroids() {
-        return asteroids.keySet().stream().toList();
+        return asteroids;
     }
 
     public List<ImageView> updateDeaths() {
         List<ImageView> deaths = new ArrayList<>();
 
         // remove asteroids that have 0 or less health and add their imageView to the deaths list
-        asteroids.forEach((a, v) -> {
+        for (int i = 0; i < asteroids.size(); i++) {
+            Asteroid a = asteroids.get(i);
+            AsteroidView v = asteroidViews.get(i);
             if(a.getHealth() <= 0) {
                 deaths.add(v.getImageView());
                 asteroids.remove(a);
+                asteroidViews.remove(v);
             }
-        });
+        }
 
         return deaths;
     }
 
     public void killOutOfBounds(double width, double height) {
         // set asteroids health to 0 if asteroidView is outside the screen
-        asteroids.forEach((a, v) -> {
+        for (int i = 0; i < asteroids.size(); i++) {
+            Asteroid a = asteroids.get(i);
+            AsteroidView v = asteroidViews.get(i);
             if(v.getLayoutX() < 0 - a.getHealth()*2 || v.getLayoutX() > width + a.getHealth()*2 || v.getLayoutY() < 0 - a.getHealth()*2 || v.getLayoutY() > height + a.getHealth()*2) {
                 a.setHealth(0.0);
             }
-        });
+        }
+    }
+
+    public List<ImageView> getViews() {
+        return asteroidViews.stream().map(AsteroidView::getImageView).toList();
     }
 }

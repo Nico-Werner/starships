@@ -1,9 +1,11 @@
 package model;
 
 import collider.MyCollider;
+import dto.BulletDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import lombok.Builder;
 import lombok.Data;
 import player.Player;
 
@@ -53,5 +55,16 @@ public class Bullet implements MyCollider {
     @Override
     public void handleCollisionWith(Pickup pickup) {
 
+    }
+
+    public BulletDTO toDTO() {
+        return BulletDTO.builder()
+                .speed(speed)
+                .damage(damage)
+                .posX(shape.getLayoutX())
+                .posY(shape.getLayoutY())
+                .rotate(shape.getRotate())
+                .radius(((Circle) shape).getRadius())
+                .build();
     }
 }

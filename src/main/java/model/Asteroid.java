@@ -1,6 +1,7 @@
 package model;
 
 import collider.MyCollider;
+import dto.AsteroidDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
@@ -45,5 +46,16 @@ public class Asteroid implements MyCollider, Serializable {
     @Override
     public void handleCollisionWith(Pickup pickup) {
 
+    }
+
+    public AsteroidDTO toDTO() {
+        return AsteroidDTO.builder()
+                .health(health)
+                .centerX(((Circle) shape).getCenterX())
+                .centerY(((Circle) shape).getCenterY())
+                .rotate(shape.getRotate())
+                .radius(((Circle) shape).getRadius())
+                .speed(speed)
+                .build();
     }
 }

@@ -25,7 +25,8 @@ public class PlayerDTO implements Serializable {
     public Player toPlayer() {
         ShipController shipController = this.shipController.toShipController();
         shipController.getShipView().updatePoints(score);
-        return Player.builder()
+
+        Player player = Player.builder()
                 .id(id)
                 .score(score)
                 .lives(lives)
@@ -36,5 +37,8 @@ public class PlayerDTO implements Serializable {
                 .keyRotateRight(keyRotateRight)
                 .keyShoot(keyShoot)
                 .build();
+
+        shipController.getBulletController().getBullets().forEach(bullet -> bullet.setShooter(player));
+        return player;
     }
 }

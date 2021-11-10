@@ -77,6 +77,7 @@ public class ShipController implements Serializable {
         return ShipControllerDTO.builder()
                 .imageName("starship.gif")
                 .ship(ship.toDTO())
+                .bulletController(bulletController.toDTO())
                 .build();
     }
 }

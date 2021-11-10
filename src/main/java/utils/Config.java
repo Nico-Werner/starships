@@ -33,4 +33,16 @@ public class Config {
             e.printStackTrace();
         }
     }
+
+    public static ShipController[] getPlayerShips() {
+        try {
+            return new ShipController[]{
+                    new ShipController(new ShipView(imageLoader.loadFromResources("starship.gif", 100, 100), 200, 200), new Ship(200.0, new SingleShooting(), new Rectangle(70, 45), 100), new BulletController()),
+                    new ShipController(new ShipView(imageLoader.loadFromResources("starship.gif", 100, 100), 1000, 200), new Ship(200.0, new SingleShooting(), new Rectangle(70, 45), 100), new BulletController())
+            };
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

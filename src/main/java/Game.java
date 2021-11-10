@@ -1,6 +1,7 @@
 import collider.MyCollider;
 import controller.AsteroidController;
 import controller.PickupController;
+import dto.AsteroidDTO;
 import dto.PlayerDTO;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
@@ -23,6 +24,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import lombok.Setter;
 import model.Asteroid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,8 @@ import utils.Config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Game extends GameApplication {
 
@@ -57,6 +61,7 @@ class GameManager {
 
     RootSetter rootSetter;
     GameContext context;
+    MainTimer mainTimer;
 
     MenuBox menu;
 
@@ -101,12 +106,8 @@ class GameManager {
         });
 
         MenuItem save = new MenuItem("SAVE GAME");
-        save.setOnMouseClicked(event -> {
-                    GameSerializer.saveGame(gameState);
-                });
+        save.setOnMouseClicked(event -> GameSerializer.saveGame(gameState));
 
-
-        //TODO
         MenuItem newGame = new MenuItem("NEW GAME");
         newGame.setOnMouseClicked(event -> {
             isIntro = !isIntro;
@@ -143,7 +144,7 @@ class GameManager {
             Player[] players = new Player[Config.PLAYERS];
             for (int i = 0; i < Config.PLAYERS; i++) {
 
-                players[i] = new Player(i, 0, Config.LIVES, Config.PLAYER_SHIPS[i],
+                players[i] = new Player(i, 0, Config.LIVES, Objects.requireNonNull(Config.getPlayerShips())[i],
                         Config.PLAYER_KEYS[i][0],
                         Config.PLAYER_KEYS[i][1],
                         Config.PLAYER_KEYS[i][2],
@@ -157,8 +158,13 @@ class GameManager {
 
             AsteroidController asteroidController = new AsteroidController();
             PickupController pickupController = new PickupController();
-            MainTimer mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
-            mainTimer.start();
+            if(mainTimer == null) mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
+            mainTimer.setPlayers(players);
+            mainTimer.setKeyTracker(context.getKeyTracker());
+            mainTimer.setImageLoader(imageLoader);
+            mainTimer.setPane(pane);
+            mainTimer.setAsteroidController(asteroidController);
+            mainTimer.setPickupController(pickupController);
 
             pane.setOnKeyPressed(event -> {
                 if (event.getCode() == KeyCode.P) {
@@ -174,16 +180,25 @@ class GameManager {
             });
         } else {
             List<Player> players = state.getPlayers().stream().map(PlayerDTO::toPlayer).toList();
-            for (int i = 0; i < players.size(); i++) {
-                pane.getChildren().add(players.get(i).getShipController().getShipView().getImageView());
-                pane.getChildren().add(players.get(i).getShipController().getShipView().getHealthView());
-                pane.getChildren().add(players.get(i).getShipController().getShipView().getPoints());
+            for (Player player : players) {
+                pane.getChildren().add(player.getShipController().getShipView().getImageView());
+                pane.getChildren().add(player.getShipController().getShipView().getHealthView());
+                pane.getChildren().add(player.getShipController().getShipView().getPoints());
+
+                //TODO bullets keep moving when paused
+                pane.getChildren().addAll(player.getShipController().getBulletController().renderBullets());
             }
 
-            AsteroidController asteroidController = new AsteroidController();
+            AsteroidController asteroidController = new AsteroidController(state.getAsteroids().stream().map(AsteroidDTO::toAsteroid).collect(Collectors.toList()));
+            pane.getChildren().addAll(asteroidController.getViews());
             PickupController pickupController = new PickupController();
-            MainTimer mainTimer = new MainTimer(players.toArray(Player[]::new), context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
-            mainTimer.start();
+            if(mainTimer == null) mainTimer = new MainTimer(players.toArray(Player[]::new), context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
+            mainTimer.setPlayers(players.toArray(Player[]::new));
+            mainTimer.setKeyTracker(context.getKeyTracker());
+            mainTimer.setImageLoader(imageLoader);
+            mainTimer.setPane(pane);
+            mainTimer.setAsteroidController(asteroidController);
+            mainTimer.setPickupController(pickupController);
 
             pane.setOnKeyPressed(event -> {
                 if (event.getCode() == KeyCode.P) {
@@ -198,7 +213,7 @@ class GameManager {
 
             });
         }
-
+        mainTimer.start();
         return pane;
     }
 
@@ -282,6 +297,7 @@ class GameManager {
 
 }
 
+@Setter
 class MainTimer extends GameTimer {
     Player[] players;
     AsteroidController asteroidController;
