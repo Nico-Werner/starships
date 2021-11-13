@@ -42,21 +42,6 @@ public class Bullet implements MyCollider {
         shooter.addPoints(damage);
     }
 
-    @Override
-    public void handleCollisionWith(Ship ship) {
-
-    }
-
-    @Override
-    public void handleCollisionWith(Bullet bullet) {
-
-    }
-
-    @Override
-    public void handleCollisionWith(Pickup pickup) {
-
-    }
-
     public BulletDTO toDTO() {
         return BulletDTO.builder()
                 .speed(speed)

@@ -9,12 +9,12 @@ import model.Ship;
 
 public interface MyCollider extends Collider<MyCollider> {
 
-    void handleCollisionWith(Asteroid asteroid);
+    default void handleCollisionWith(Asteroid asteroid) {}
 
-    void handleCollisionWith(Ship ship);
+    default void handleCollisionWith(Ship ship) {};
 
-    void handleCollisionWith(Bullet bullet);
+    default void handleCollisionWith(Bullet bullet) {};
 
-    void handleCollisionWith(Pickup pickup);
+    default void handleCollisionWith(Pickup pickup) {};
 
 }

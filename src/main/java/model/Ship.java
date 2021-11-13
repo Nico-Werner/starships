@@ -40,23 +40,14 @@ public class Ship implements MyCollider {
     }
 
     @Override
-    public void handleCollisionWith(Asteroid asteroid) {
-
-    }
-
-    @Override
-    public void handleCollisionWith(Ship ship) {
-
-    }
-
-    @Override
     public void handleCollisionWith(Bullet bullet) {
+        if(bullet.getShooter().getShipController().getShip() != this) {
+            health -= bullet.getDamage() / 10;
 
-    }
-
-    @Override
-    public void handleCollisionWith(Pickup pickup) {
-
+            bullet.setSpeed(0);
+            if(health < 0) bullet.getShooter().addPoints(bullet.getDamage());
+            bullet.getShooter().addPoints(bullet.getDamage()/10);
+        }
     }
 
     public ShipDTO toDTO() {
