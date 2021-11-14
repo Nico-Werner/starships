@@ -2,6 +2,7 @@ import collider.MyCollider;
 import controller.AsteroidController;
 import controller.PickupController;
 import dto.AsteroidDTO;
+import dto.PickupDTO;
 import dto.PlayerDTO;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
@@ -9,6 +10,7 @@ import edu.austral.dissis.starships.game.*;
 import factory.AsteroidFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -35,6 +37,7 @@ import utils.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -204,7 +207,8 @@ class GameManager {
 
             AsteroidController asteroidController = new AsteroidController(state.getAsteroids().stream().map(AsteroidDTO::toAsteroid).collect(Collectors.toList()));
             pane.getChildren().addAll(asteroidController.getViews());
-            PickupController pickupController = new PickupController();
+            PickupController pickupController = new PickupController(state.getPickups().stream().map(PickupDTO::toPickup).collect(Collectors.toList()));
+            pane.getChildren().addAll(pickupController.getViews());
             if(mainTimer == null) mainTimer = new MainTimer(players.toArray(Player[]::new), context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
             mainTimer.setPlayers(players.toArray(Player[]::new));
             mainTimer.setKeyTracker(context.getKeyTracker());
@@ -340,11 +344,52 @@ class MainTimer extends GameTimer {
             paused = false;
         }
         pane.requestFocus();
+
+        reviveDeadPlayers();
         updatePosition(secondsSinceLastFrame);
+        collisionEngine.checkCollisions(getColliders());
         updateHealths();
         updateDeaths();
         spawnAsteroid();
         spawnPickup();
+
+        if(Arrays.stream(players).allMatch(Player::isDead)) {
+            stop();
+            StackPane gameOverRectangle = createGameOverRectangle();
+            gameOverRectangle.translateXProperty().setValue(pane.getWidth() / 2 - gameOverRectangle.getPrefWidth() / 2);
+            gameOverRectangle.translateYProperty().setValue(pane.getHeight() / 2 - gameOverRectangle.getPrefHeight() / 2);
+            pane.getChildren().add(gameOverRectangle);
+        }
+    }
+
+    private void reviveDeadPlayers() {
+        for (Player player : players) {
+            if (player.getLives() > 0 && player.getShipController().getShip().getHealth() <= 0) {
+                player.setShipController(Objects.requireNonNull(Config.getPlayerShips())[player.getId()]);
+                pane.getChildren().add(player.getShipController().getShipView().getImageView());
+                pane.getChildren().add(player.getShipController().getShipView().getHealthView());
+                pane.getChildren().add(player.getShipController().getShipView().getPoints());
+            }
+        }
+    }
+
+    private StackPane createGameOverRectangle() {
+        Rectangle rectangle = new Rectangle(600, 200);
+        rectangle.setFill(Color.BLACK);
+        rectangle.setOpacity(0.4);
+        rectangle.setLayoutX(150);
+        rectangle.setLayoutY(150);
+
+        Text text = new Text("GAME OVER");
+        text.setFont(Font.font(100));
+        text.setFill(Color.WHITE);
+        text.setX(150);
+        text.setY(150);
+
+        StackPane stackPane = new StackPane(rectangle, text);
+        stackPane.setPrefSize(600, 200);
+
+        return stackPane;
     }
 
     private void updateHealths() {
@@ -369,27 +414,29 @@ class MainTimer extends GameTimer {
     }
 
     private void updatePosition(Double secondsSinceLastFrame) {
-
         for(Player player : players) {
             player.updateInput(pane, keyTracker, secondsSinceLastFrame);
             player.getShipController().getBulletController().updatePositions(secondsSinceLastFrame);
         }
-
         asteroidController.updatePositions(secondsSinceLastFrame);
+    }
 
+    private List<MyCollider> getColliders() {
         List<MyCollider> colliders = new ArrayList<>();
-        colliders.addAll(asteroidController.getAsteroids());
-        colliders.addAll(pickupController.getPickups());
         for (Player player : players) {
             colliders.add(player.getShipController().getShip());
             colliders.addAll(player.getShipController().getBulletController().getBullets());
         }
-        collisionEngine.checkCollisions(colliders);
+        colliders.addAll(asteroidController.getAsteroids());
+        colliders.addAll(pickupController.getPickups());
+        return colliders;
     }
 
     private void updateDeaths() {
         for(Player player : players) {
-            pane.getChildren().remove(player.getShipController().updateDeath());
+            if(player.isShipDead()) {
+                pane.getChildren().remove(player.updateDeath());
+            }
             pane.getChildren().removeAll(player.getShipController().getBulletController().removeDeadBullets(pane.getWidth(), pane.getHeight()));
         }
         asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());

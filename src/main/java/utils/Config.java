@@ -15,7 +15,7 @@ public class Config {
     private static final ImageLoader imageLoader = new ImageLoader();
 
     public static final int PLAYERS = 2;
-    public static final int LIVES = 3;
+    public static final int LIVES = 1;
 
     public static final KeyCode[][] PLAYER_KEYS = {
             {KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.SHIFT},

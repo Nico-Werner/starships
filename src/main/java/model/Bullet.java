@@ -5,8 +5,8 @@ import dto.BulletDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
-import lombok.Builder;
 import lombok.Data;
+import org.jetbrains.annotations.Nullable;
 import player.Player;
 
 @Data
@@ -15,6 +15,8 @@ public class Bullet implements MyCollider {
     Shape shape;
     double speed;
     double damage;
+
+    @Nullable
     Player shooter;
 
     public Bullet(Circle circle, double speed, double damage, Player shooter) {
@@ -38,8 +40,10 @@ public class Bullet implements MyCollider {
     @Override
     public void handleCollisionWith(Asteroid asteroid) {
         speed = 0;
-        if(asteroid.getHealth() < 0) shooter.addPoints(damage);
-        shooter.addPoints(damage);
+        if(shooter != null) {
+            if(asteroid.getHealth() < 0) shooter.addPoints(damage);
+            shooter.addPoints(damage);
+        }
     }
 
     public BulletDTO toDTO() {

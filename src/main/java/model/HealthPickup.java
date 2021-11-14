@@ -1,9 +1,12 @@
 package model;
 
 import collider.MyCollider;
+import dto.PickupDTO;
+import dto.PickupType;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Timer;
@@ -11,8 +14,11 @@ import java.util.TimerTask;
 
 @Getter
 public class HealthPickup implements Pickup {
+    @Setter
     boolean active = true;
+
     Shape shape = new Rectangle(50, 50);
+    private final PickupType type = PickupType.HEALTH;
 
     public HealthPickup(int xPos, int yPos) {
         shape.setLayoutX(xPos);
@@ -34,9 +40,16 @@ public class HealthPickup implements Pickup {
     @Override
     public void handleCollisionWith(Ship ship) {
         if(!active) return;
-
-        if(ship.getHealth() >= 150) ship.setHealth(200.0);
-        else ship.heal(50);
+        ship.heal(50);
         active = false;
+    }
+
+    @Override
+    public PickupDTO toDTO() {
+        return PickupDTO.builder()
+                .xPos(shape.getLayoutX())
+                .yPos(shape.getLayoutY())
+                .type(type)
+                .build();
     }
 }

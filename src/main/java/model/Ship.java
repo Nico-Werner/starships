@@ -12,14 +12,23 @@ import lombok.Data;
 import player.Player;
 import strategy.ShootingStrategy;
 
-@AllArgsConstructor
 @Data
 @Builder
+@AllArgsConstructor
 public class Ship implements MyCollider {
     private Double health;
+    private Double maxHealth;
     private ShootingStrategy shootingStrategy;
     private Shape shape;
     private double speed;
+
+    public Ship(Double health, ShootingStrategy shootingStrategy, Shape shape, double speed) {
+        this.health = health;
+        this.maxHealth = health;
+        this.shootingStrategy = shootingStrategy;
+        this.shape = shape;
+        this.speed = speed;
+    }
 
     public void fire(BulletController bulletController, Player shooter) {
         shootingStrategy.shoot(shooter, bulletController, shape.getLayoutX() + ((Rectangle) shape).getWidth()/2 , shape.getLayoutY() + ((Rectangle) shape).getHeight()/2, shape.getRotate());
@@ -31,28 +40,38 @@ public class Ship implements MyCollider {
     }
 
     public void move(Vector2 to) {
-        shape.setLayoutX(to.getX() + (100 - ((Rectangle) shape).getWidth())/2);
-        shape.setLayoutY(to.getY() + (100 - ((Rectangle) shape).getHeight())/2);
+        shape.setLayoutX(to.getX());
+        shape.setLayoutY(to.getY());
     }
 
     public void heal(int amount) {
         health += amount;
+        if(health > maxHealth) health = maxHealth;
     }
 
     @Override
     public void handleCollisionWith(Bullet bullet) {
-        if(bullet.getShooter().getShipController().getShip() != this) {
+        if (bullet.getShooter() == null || bullet.getShooter().getShipController().getShip() != this) {
             health -= bullet.getDamage() / 10;
 
             bullet.setSpeed(0);
-            if(health < 0) bullet.getShooter().addPoints(bullet.getDamage());
-            bullet.getShooter().addPoints(bullet.getDamage()/10);
+            if(bullet.getShooter() != null) {
+                if (health < 0) bullet.getShooter().addPoints(bullet.getDamage());
+                bullet.getShooter().addPoints(bullet.getDamage() / 10);
+            }
         }
+    }
+
+    @Override
+    public void handleCollisionWith(Asteroid asteroid) {
+        health -= asteroid.getHealth()/2;
+        asteroid.setHealth(0.0);
     }
 
     public ShipDTO toDTO() {
         return ShipDTO.builder()
                 .health(health)
+                .maxHealth(maxHealth)
                 .shootingStrategy(shootingStrategy)
                 .speed(speed)
                 .posX(shape.getLayoutX())

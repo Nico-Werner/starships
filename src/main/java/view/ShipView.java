@@ -74,4 +74,12 @@ public class ShipView {
     public void updatePoints(int points) {
         this.points.setText(String.valueOf(points));
     }
+
+    public double getWidth() {
+        return imageView.getImage().getWidth();
+    }
+
+    public double getHeight() {
+        return imageView.getImage().getHeight();
+    }
 }

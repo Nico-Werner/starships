@@ -29,6 +29,7 @@ public class Player implements Serializable {
     KeyCode keyShoot;
 
     public void updateInput(Pane pane, KeyTracker keyTracker, double secondsSinceLastFrame) {
+        if(isDead()) return;
         keyTracker.getKeySet().forEach(keyCode -> {
             if (keyCode == keyForward) shipController.forward(secondsSinceLastFrame, pane);
             else if (keyCode == keyBackward) shipController.backward(secondsSinceLastFrame, pane);
@@ -63,5 +64,20 @@ public class Player implements Serializable {
                 .keyRotateRight(keyRotateRight)
                 .keyShoot(keyShoot)
                 .build();
+    }
+
+    public boolean isDead() {
+        return shipController.getShip().getHealth() <= 0 && lives <= 0;
+    }
+
+    public ImageView updateDeath() {
+        ImageView imageView = shipController.updateDeath();
+        if(imageView == null) return null;
+        lives--;
+        return imageView;
+    }
+
+    public boolean isShipDead() {
+        return shipController.getShip().getHealth() <= 0;
     }
 }

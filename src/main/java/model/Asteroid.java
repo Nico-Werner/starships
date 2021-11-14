@@ -28,24 +28,8 @@ public class Asteroid implements MyCollider, Serializable {
     }
 
     @Override
-    public void handleCollisionWith(Asteroid asteroid) {
-
-    }
-
-    @Override
-    public void handleCollisionWith(Ship ship) {
-        ship.setHealth(ship.getHealth() - health/2);
-        health = 0.0;
-    }
-
-    @Override
     public void handleCollisionWith(Bullet bullet) {
         health = health - bullet.getDamage();
-    }
-
-    @Override
-    public void handleCollisionWith(Pickup pickup) {
-
     }
 
     public AsteroidDTO toDTO() {

@@ -16,6 +16,7 @@ import java.util.TimerTask;
 @Builder
 public class ShipDTO implements Serializable {
     private double health;
+    private double maxHealth;
     private double posX;
     private double posY;
     private double speed;
@@ -30,6 +31,7 @@ public class ShipDTO implements Serializable {
 
         Ship ship = Ship.builder()
                 .health(health)
+                .maxHealth(maxHealth)
                 .shape(shape)
                 .speed(speed)
                 .shootingStrategy(shootingStrategy)

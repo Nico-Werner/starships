@@ -1,9 +1,12 @@
 package model;
 
 import collider.MyCollider;
+import dto.PickupDTO;
+import dto.PickupType;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import strategy.impl.SingleShooting;
 import strategy.impl.TripleShooting;
@@ -13,8 +16,11 @@ import java.util.TimerTask;
 
 @Getter
 public class TripleShootingPickup implements Pickup {
+    @Setter
     boolean active = true;
+
     Shape shape = new Rectangle(50, 50);
+    private final PickupType type = PickupType.TRIPLE_SHOOTING;
 
     public TripleShootingPickup(int xPos, int yPos) {
         shape.setLayoutX(xPos);
@@ -44,8 +50,19 @@ public class TripleShootingPickup implements Pickup {
         new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    ship.setShootingStrategy(new SingleShooting());
+                    SingleShooting singleShooting = new SingleShooting();
+                    singleShooting.setCooldown(ship.getShootingStrategy().getCooldown());
+                    ship.setShootingStrategy(singleShooting);
                 }
             } , 10000);
+    }
+
+    @Override
+    public PickupDTO toDTO() {
+        return PickupDTO.builder()
+                .xPos(shape.getLayoutX())
+                .yPos(shape.getLayoutY())
+                .type(type)
+                .build();
     }
 }

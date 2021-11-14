@@ -4,6 +4,7 @@ import dto.ShipControllerDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,9 +64,9 @@ public class ShipController implements Serializable {
     private void moveShip(Pane pane, Vector2 movementVector, Vector2 from) {
         Vector2 to = from.add(movementVector);
 
-        if(to.getX() > 0 && to.getX() < pane.getWidth() - 100 && to.getY() > 0 && to.getY() < pane.getHeight() - 100) {
+        if(to.getX() > 0 && to.getX() < pane.getWidth() - shipView.getWidth() && to.getY() > 0 && to.getY() < pane.getHeight() - shipView.getHeight()) {
             shipView.move(to);
-            ship.move(to);
+            ship.move(Vector2.vector(to.getX() + (shipView.getWidth() - ((Rectangle) ship.getShape()).getWidth())/2, to.getY() + (shipView.getHeight() - ((Rectangle) ship.getShape()).getHeight())/2));
         }
     }
 
