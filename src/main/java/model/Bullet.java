@@ -19,7 +19,7 @@ public class Bullet implements MyCollider {
     @Nullable
     Player shooter;
 
-    public Bullet(Circle circle, double speed, double damage, Player shooter) {
+    public Bullet(Circle circle, double speed, double damage, @Nullable Player shooter) {
         shape = circle;
         this.speed = speed;
         this.damage = damage;

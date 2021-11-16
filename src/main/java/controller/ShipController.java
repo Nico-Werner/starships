@@ -26,14 +26,24 @@ public class ShipController implements Serializable {
         double movement = secondsSinceLastFrame * ship.getSpeed();
         Vector2 movementVector = Vector2.vectorFromModule(movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
         Vector2 from = Vector2.vector((float) shipView.getLayoutX(), (float) shipView.getLayoutY());
-        moveShip(pane, movementVector, from);
+        Vector2 to = from.add(movementVector);
+        if(isInBounds(pane, to)) {
+            moveShip(to);
+        }
+    }
+
+    private boolean isInBounds(Pane pane, Vector2 to) {
+        return to.getX() > 0 && to.getX() < pane.getWidth() - shipView.getWidth() && to.getY() > 0 && to.getY() < pane.getHeight() - shipView.getHeight();
     }
 
     public void backward(Double secondsSinceLastFrame, Pane pane) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
         Vector2 movementVector = Vector2.vectorFromModule(-movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
         Vector2 from = Vector2.vector(shipView.getLayoutX(), shipView.getLayoutY());
-        moveShip(pane, movementVector, from);
+        Vector2 to = from.add(movementVector);
+        if(isInBounds(pane, to)) {
+            moveShip(to);
+        }
     }
 
     public void rotateLeft(Double secondsSinceLastFrame) {
@@ -61,13 +71,9 @@ public class ShipController implements Serializable {
         ship.fire(bulletController, shooter);
     }
 
-    private void moveShip(Pane pane, Vector2 movementVector, Vector2 from) {
-        Vector2 to = from.add(movementVector);
-
-        if(to.getX() > 0 && to.getX() < pane.getWidth() - shipView.getWidth() && to.getY() > 0 && to.getY() < pane.getHeight() - shipView.getHeight()) {
-            shipView.move(to);
-            ship.move(Vector2.vector(to.getX() + (shipView.getWidth() - ((Rectangle) ship.getShape()).getWidth())/2, to.getY() + (shipView.getHeight() - ((Rectangle) ship.getShape()).getHeight())/2));
-        }
+    public void moveShip(Vector2 to) {
+        shipView.move(to);
+        ship.move(Vector2.vector(to.getX() + (shipView.getWidth() - ((Rectangle) ship.getShape()).getWidth())/2, to.getY() + (shipView.getHeight() - ((Rectangle) ship.getShape()).getHeight())/2));
     }
 
     public void updateHealth() {
@@ -76,9 +82,12 @@ public class ShipController implements Serializable {
 
     public ShipControllerDTO toDTO() {
         return ShipControllerDTO.builder()
-                .imageName("starship.gif")
                 .ship(ship.toDTO())
                 .bulletController(bulletController.toDTO())
                 .build();
+    }
+
+    public void updateShipStyle(String shipName) {
+        shipView.updateShipStyle(shipName);
     }
 }

@@ -80,4 +80,8 @@ public class Player implements Serializable {
     public boolean isShipDead() {
         return shipController.getShip().getHealth() <= 0;
     }
+
+    public void updateShipStyle(String shipName) {
+        shipController.updateShipStyle(shipName);
+    }
 }

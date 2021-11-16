@@ -8,23 +8,14 @@ import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
 import factory.AsteroidFactory;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import lombok.Setter;
 import model.Asteroid;
@@ -33,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import player.Player;
 import serializer.GameSerializer;
 import serializer.GameState;
+import ui.MenuBox;
+import ui.MenuItem;
 import utils.Config;
 
 import java.io.IOException;
@@ -66,21 +59,20 @@ class GameManager {
     GameContext context;
     MainTimer mainTimer;
 
-    MenuBox menu;
-
     public GameManager(RootSetter rootSetter, GameContext gameContext) {
         this.rootSetter = rootSetter;
         this.context = gameContext;
     }
 
-    boolean isIntro = true;
+    boolean isMenu = true;
 
     Parent init() throws IOException {
 
-        return isIntro ? loadIntro(null) : loadGame(null);
+        return isMenu ? loadMenu(null) : loadGame(null);
+
     }
 
-    private Parent loadIntro(@Nullable GameState gameState) throws IOException {
+    private Parent loadMenu(@Nullable GameState gameState) throws IOException {
         Pane pane = new Pane();
         pane.setPrefSize(1920, 1080);
 
@@ -97,7 +89,7 @@ class GameManager {
 
         MenuItem loadSaved = new MenuItem("LOAD GAME");
         loadSaved.setOnMouseClicked(event -> {
-            isIntro = !isIntro;
+            isMenu = !isMenu;
             try {
                 if(gameState == null) {
                     rootSetter.setRoot(init());
@@ -110,7 +102,7 @@ class GameManager {
 
         MenuItem resumeGame = new MenuItem("RESUME GAME");
         resumeGame.setOnMouseClicked(event -> {
-            isIntro = !isIntro;
+            isMenu = !isMenu;
             try {
                 if(gameState == null) {
                     rootSetter.setRoot(init());
@@ -126,7 +118,7 @@ class GameManager {
 
         MenuItem newGame = new MenuItem("NEW GAME");
         newGame.setOnMouseClicked(event -> {
-            isIntro = !isIntro;
+            isMenu = !isMenu;
             try {
                 rootSetter.setRoot(loadGame(null));
             }
@@ -134,18 +126,27 @@ class GameManager {
                 e.printStackTrace();
             }});
 
-        menu = new MenuBox("STARSHIPS",
+        MenuItem change_ship = new MenuItem("CHANGE SHIP");
+        change_ship.setOnMouseClicked(event -> {
+            try {
+                rootSetter.setRoot(loadShipSelect(0, gameState));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        MenuBox menu = new MenuBox("STARSHIPS",
                 resumeGame,
                 loadSaved,
                 newGame,
                 save,
+                change_ship,
                 exit);
 
         pane.getChildren().add(menu);
 
         return pane;
     }
-
 
     private Parent loadGame(@Nullable GameState state) throws IOException {
         ImageLoader imageLoader = new ImageLoader();
@@ -157,8 +158,12 @@ class GameManager {
                 BackgroundSize.DEFAULT);
         pane.setBackground(new Background(myBI));
 
+        Player[] players;
+        AsteroidController asteroidController;
+        PickupController pickupController;
+
         if(state == null) {
-            Player[] players = new Player[Config.PLAYERS];
+            players = new Player[Config.PLAYERS];
             for (int i = 0; i < Config.PLAYERS; i++) {
 
                 players[i] = new Player(i, 0, Config.LIVES, Objects.requireNonNull(Config.getPlayerShips())[i],
@@ -167,150 +172,91 @@ class GameManager {
                         Config.PLAYER_KEYS[i][2],
                         Config.PLAYER_KEYS[i][3],
                         Config.PLAYER_KEYS[i][4]);
-
-                pane.getChildren().add(players[i].getShipController().getShipView().getImageView());
-                pane.getChildren().add(players[i].getShipController().getShipView().getHealthView());
-                pane.getChildren().add(players[i].getShipController().getShipView().getPoints());
             }
-
-            AsteroidController asteroidController = new AsteroidController();
-            PickupController pickupController = new PickupController();
-            if(mainTimer == null) mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
-            mainTimer.setPlayers(players);
-            mainTimer.setKeyTracker(context.getKeyTracker());
-            mainTimer.setImageLoader(imageLoader);
-            mainTimer.setPane(pane);
-            mainTimer.setAsteroidController(asteroidController);
-            mainTimer.setPickupController(pickupController);
-
-            pane.setOnKeyPressed(event -> {
-                if (event.getCode() == KeyCode.P) {
-                    isIntro = !isIntro;
-                    try {
-                        mainTimer.stop();
-                        mainTimer.setPaused(true);
-                        rootSetter.setRoot(loadIntro(new GameState(List.of(players), asteroidController.getAsteroids(), pickupController.getPickups())));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            });
+            asteroidController = new AsteroidController();
+            pickupController = new PickupController();
         } else {
-            List<Player> players = state.getPlayers().stream().map(PlayerDTO::toPlayer).toList();
-            for (Player player : players) {
-                pane.getChildren().add(player.getShipController().getShipView().getImageView());
-                pane.getChildren().add(player.getShipController().getShipView().getHealthView());
-                pane.getChildren().add(player.getShipController().getShipView().getPoints());
-                pane.getChildren().addAll(player.getShipController().getBulletController().renderBullets());
+            players = state.getPlayers().stream().map(PlayerDTO::toPlayer).toArray(Player[]::new);
+            asteroidController = new AsteroidController(state.getAsteroids().stream().map(AsteroidDTO::toAsteroid).collect(Collectors.toList()));
+            pane.getChildren().addAll(asteroidController.getViews());
+            pickupController = new PickupController(state.getPickups().stream().map(PickupDTO::toPickup).collect(Collectors.toList()));
+            pane.getChildren().addAll(pickupController.getViews());
+        }
+
+        for (Player player : players) {
+            player.updateShipStyle(Config.SHIP_NAMES[player.getId()]);
+            pane.getChildren().add(player.getShipController().getShipView().getImageView());
+            pane.getChildren().add(player.getShipController().getShipView().getHealthView());
+            pane.getChildren().add(player.getShipController().getShipView().getPoints());
+            pane.getChildren().addAll(player.getShipController().getBulletController().renderBullets());
+        }
+
+        if(mainTimer == null) mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
+        mainTimer.setPlayers(players);
+        mainTimer.setKeyTracker(context.getKeyTracker());
+        mainTimer.setImageLoader(imageLoader);
+        mainTimer.setPane(pane);
+        mainTimer.setAsteroidController(asteroidController);
+        mainTimer.setPickupController(pickupController);
+
+        pane.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.P) {
+                isMenu = !isMenu;
+                try {
+                    mainTimer.stop();
+                    mainTimer.setPaused(true);
+                    rootSetter.setRoot(loadMenu(new GameState(List.of(players), asteroidController.getAsteroids(), pickupController.getPickups())));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
-            AsteroidController asteroidController = new AsteroidController(state.getAsteroids().stream().map(AsteroidDTO::toAsteroid).collect(Collectors.toList()));
-            pane.getChildren().addAll(asteroidController.getViews());
-            PickupController pickupController = new PickupController(state.getPickups().stream().map(PickupDTO::toPickup).collect(Collectors.toList()));
-            pane.getChildren().addAll(pickupController.getViews());
-            if(mainTimer == null) mainTimer = new MainTimer(players.toArray(Player[]::new), context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
-            mainTimer.setPlayers(players.toArray(Player[]::new));
-            mainTimer.setKeyTracker(context.getKeyTracker());
-            mainTimer.setImageLoader(imageLoader);
-            mainTimer.setPane(pane);
-            mainTimer.setAsteroidController(asteroidController);
-            mainTimer.setPickupController(pickupController);
-
-            pane.setOnKeyPressed(event -> {
-                if (event.getCode() == KeyCode.P) {
-                    isIntro = !isIntro;
-                    try {
-                        mainTimer.stop();
-                        mainTimer.setPaused(true);
-                        rootSetter.setRoot(loadIntro(new GameState(players, asteroidController.getAsteroids(), pickupController.getPickups())));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            });
-        }
+        });
         mainTimer.start();
         return pane;
     }
 
-    private static class MenuBox extends StackPane {
-        public MenuBox(String title, MenuItem... items) {
-            Rectangle bg = new Rectangle(300, 1080);
-            bg.setOpacity(0.2);
+    private Parent loadShipSelect(int i, GameState gameState) throws IOException {
+        ImageLoader imageLoader = new ImageLoader();
 
-            DropShadow shadow = new DropShadow(7, 5, 0, Color.BLACK);
-            shadow.setSpread(0.8);
+        Pane pane = new Pane();
 
-            bg.setEffect(shadow);
+        BackgroundImage myBI= new BackgroundImage(imageLoader.loadFromResources("background.png", 1920, 1080),
+                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT);
+        pane.setBackground(new Background(myBI));
 
-            Text text = new Text(title + " ");
-            text.setFont(Font.font("Verdana", FontWeight.BOLD, 30));
-            text.setFill(Color.WHITE);
+        MenuItem blue = new MenuItem("BLUE");
+        blue.setOnMouseClicked(event -> Config.setShip(i, "starship.gif"));
 
-            Line hSep = new Line();
-            hSep.setEndX(250);
-            hSep.setStroke(Color.DARKRED);
-            hSep.setOpacity(0.4);
+        MenuItem green = new MenuItem("GREEN");
+        green.setOnMouseClicked(event -> Config.setShip(i, "green-ship.png"));
 
-            Line vSep = new Line();
-            vSep.setStartX(300);
-            vSep.setEndX(300);
-            vSep.setEndY(1080);
-            vSep.setStroke(Color.DARKRED);
-            vSep.setOpacity(0.4);
+        MenuItem next = new MenuItem("NEXT PLAYER");
+        next.setOnMouseClicked(event -> {
+            try {
+                if(i == Config.PLAYERS - 1) rootSetter.setRoot(loadShipSelect(0, gameState));
+                else rootSetter.setRoot(loadShipSelect(i + 1, gameState));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
-            VBox vBox = new VBox();
-            vBox.setAlignment(Pos.TOP_RIGHT);
-            vBox.setPadding(new Insets(60, 0, 0, 0));
-            vBox.getChildren().addAll(text, hSep);
-            vBox.getChildren().addAll(items);
+        MenuItem back = new MenuItem("BACK TO MENU");
+        back.setOnMouseClicked(event -> {
+            try {
+                rootSetter.setRoot(loadMenu(gameState));
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
-            setAlignment(Pos.TOP_RIGHT);
-            getChildren().addAll(bg, vSep, vBox);
-        }
-    }
+        MenuBox menu = new MenuBox("PLAYER: " + i, blue, green, next, back);
 
-    private static class MenuItem extends StackPane {
-        public MenuItem(String name) {
-            Rectangle bg = new Rectangle(300, 24);
+        pane.getChildren().add(menu);
 
-            LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
-                    new Stop(0, Color.BLACK),
-                    new Stop(0.2, Color.DARKGRAY));
-
-            bg.setFill(gradient);
-            bg.setVisible(false);
-            bg.setEffect(new DropShadow(5, 0, 5, Color.BLACK));
-
-            Text text = new Text(name + "    ");
-            text.setFill(Color.LIGHTGRAY);
-            text.setFont(Font.font(20));
-
-            setAlignment(Pos.CENTER_RIGHT);
-            getChildren().addAll(bg, text);
-
-            setOnMouseEntered(event -> {
-                bg.setVisible(true);
-                text.setFill(Color.WHITE);
-            });
-
-            setOnMouseExited(event -> {
-                bg.setVisible(false);
-                text.setFill(Color.LIGHTGRAY);
-            });
-
-            setOnMousePressed(event -> {
-                bg.setFill(Color.WHITE);
-                text.setFill(Color.BLACK);
-            });
-
-            setOnMouseReleased(event -> {
-                bg.setFill(gradient);
-                text.setFill(Color.WHITE);
-            });
-        }
+        return pane;
     }
 
 }

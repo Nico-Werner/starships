@@ -14,14 +14,13 @@ import java.io.Serializable;
 @Data
 @Builder
 public class ShipControllerDTO implements Serializable {
-    private String imageName;
     private ShipDTO ship;
     private BulletControllerDTO bulletController;
 
     @SneakyThrows
     public ShipController toShipController() {
         ImageLoader imageLoader = new ImageLoader();
-        ShipView shipView = new ShipView(imageLoader.loadFromResources(imageName, 100, 100), (int) ship.getPosX(), (int) ship.getPosY());
+        ShipView shipView = new ShipView(imageLoader.loadFromResources("starship.gif", 100, 100), (int) ship.getPosX(), (int) ship.getPosY());
         shipView.getImageView().setRotate(ship.getAngle());
         return ShipController.builder()
                 .shipView(shipView)
