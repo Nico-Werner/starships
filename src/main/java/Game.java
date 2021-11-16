@@ -55,8 +55,8 @@ public class Game extends GameApplication {
 
 class GameManager {
 
-    RootSetter rootSetter;
-    GameContext context;
+    final RootSetter rootSetter;
+    final GameContext context;
     MainTimer mainTimer;
 
     public GameManager(RootSetter rootSetter, GameContext gameContext) {

@@ -2,9 +2,6 @@ package view;
 
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.vector.Vector2;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

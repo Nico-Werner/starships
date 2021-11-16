@@ -1,7 +1,6 @@
 package controller;
 
 import edu.austral.dissis.starships.file.ImageLoader;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ import java.util.*;
 
 @NoArgsConstructor
 public class PickupController {
-    Map<Pickup, PickupView> pickups = new HashMap<>();
+    private final Map<Pickup, PickupView> pickups = new HashMap<>();
 
     public PickupController(List<Pickup> pickups) {
         ImageLoader imageLoader = new ImageLoader();

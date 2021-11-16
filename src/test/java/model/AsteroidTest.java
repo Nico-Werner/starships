@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AsteroidTest {
 
-    Asteroid asteroid = new Asteroid(100.0, new Circle(100), 100);
+    private final Asteroid asteroid = new Asteroid(100.0, new Circle(100), 100);
 
     @Test
     void move() {

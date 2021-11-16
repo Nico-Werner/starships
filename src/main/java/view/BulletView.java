@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 public class BulletView {
-    ImageView imageView;
+    private final ImageView imageView;
 
     public BulletView(Image image, double layoutX, double layoutY, double rotate) {
         this.imageView = new ImageView(image);

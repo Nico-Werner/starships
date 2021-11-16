@@ -1,7 +1,6 @@
 package dto;
 
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Shape;
 import lombok.Builder;
 import lombok.Data;
 import model.Bullet;

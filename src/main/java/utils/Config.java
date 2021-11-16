@@ -22,7 +22,7 @@ public class Config {
             {KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.SPACE}
     };
 
-    public static String[] SHIP_NAMES = {"starship.gif", "starship.gif"};
+    public static final String[] SHIP_NAMES = {"starship.gif", "starship.gif"};
 
     public static ShipController[] getPlayerShips() {
         try {

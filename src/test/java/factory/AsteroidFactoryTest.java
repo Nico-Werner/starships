@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AsteroidFactoryTest {
 
-    AsteroidFactory asteroidFactory = new AsteroidFactory();
+    private final AsteroidFactory asteroidFactory = new AsteroidFactory();
 
     @Test
     void createAsteroid() {

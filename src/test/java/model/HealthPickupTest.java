@@ -1,14 +1,13 @@
 package model;
 
 import org.junit.jupiter.api.Test;
-import strategy.impl.SingleShooting;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class HealthPickupTest {
 
-    Ship ship = new Ship(100.0, null,null,1);
-    Pickup pickup = new HealthPickup(0, 0);
+    private final Ship ship = new Ship(100.0, null,null,1);
+    private final Pickup pickup = new HealthPickup(0, 0);
 
     @Test
     void handleCollisionWithShip() {

@@ -12,8 +12,8 @@ import view.AsteroidView;
 import java.util.*;
 
 public class AsteroidController {
-    List<Asteroid> asteroids = new ArrayList<>();
-    List<AsteroidView> asteroidViews = new ArrayList<>();
+    private List<Asteroid> asteroids = new ArrayList<>();
+    private final List<AsteroidView> asteroidViews = new ArrayList<>();
 
     public AsteroidController() {}
 

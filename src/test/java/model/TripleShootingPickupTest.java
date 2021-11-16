@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TripleShootingPickupTest {
 
-    Ship ship = new Ship(100.0, new SingleShooting(), null, 100);
-    Pickup pickup = new TripleShootingPickup(0, 0);
+    private final Ship ship = new Ship(100.0, new SingleShooting(), null, 100);
+    private final Pickup pickup = new TripleShootingPickup(0, 0);
 
     @Test
     void handleCollisionWithShip() {

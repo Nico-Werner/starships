@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BulletTest {
 
-    Bullet bullet = new Bullet(new Circle(10), 10, 10, null);
-    Asteroid asteroid = new Asteroid(100.0, new Circle(100), 10);
+    final Bullet bullet = new Bullet(new Circle(10), 10, 10, null);
+    final Asteroid asteroid = new Asteroid(100.0, new Circle(100), 10);
 
     @Test
     void move() {

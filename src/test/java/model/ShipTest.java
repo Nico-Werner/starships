@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ShipTest {
 
-    Ship ship = new Ship(100.0, new SingleShooting(), new Rectangle(100, 70), 100);
+    private final Ship ship = new Ship(100.0, new SingleShooting(), new Rectangle(100, 70), 100);
 
     @Test
     void move() {

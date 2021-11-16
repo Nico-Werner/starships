@@ -17,9 +17,9 @@ import java.util.TimerTask;
 @Getter
 public class TripleShootingPickup implements Pickup {
     @Setter
-    boolean active = true;
+    private boolean active = true;
 
-    Shape shape = new Rectangle(50, 50);
+    private final Shape shape = new Rectangle(50, 50);
     private final PickupType type = PickupType.TRIPLE_SHOOTING;
 
     public TripleShootingPickup(int xPos, int yPos) {

@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RapidFirePickupTest {
 
-    Ship ship = new Ship(100.0, new SingleShooting(), null, 10);
-    Pickup rapidFirePickup = new RapidFirePickup(0, 0);
+    private final Ship ship = new Ship(100.0, new SingleShooting(), null, 10);
+    private final Pickup rapidFirePickup = new RapidFirePickup(0, 0);
 
     @Test
     void handleCollisionWithShip() {

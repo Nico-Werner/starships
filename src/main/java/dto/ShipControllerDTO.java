@@ -1,9 +1,7 @@
 package dto;
 
-import controller.BulletController;
 import controller.ShipController;
 import edu.austral.dissis.starships.file.ImageLoader;
-import javafx.scene.image.Image;
 import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;

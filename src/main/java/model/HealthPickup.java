@@ -15,9 +15,9 @@ import java.util.TimerTask;
 @Getter
 public class HealthPickup implements Pickup {
     @Setter
-    boolean active = true;
+    private boolean active = true;
 
-    Shape shape = new Rectangle(50, 50);
+    private final Shape shape = new Rectangle(50, 50);
     private final PickupType type = PickupType.HEALTH;
 
     public HealthPickup(int xPos, int yPos) {
