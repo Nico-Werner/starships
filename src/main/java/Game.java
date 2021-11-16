@@ -165,7 +165,6 @@ class GameManager {
         if(state == null) {
             players = new Player[Config.PLAYERS];
             for (int i = 0; i < Config.PLAYERS; i++) {
-
                 players[i] = new Player(i, 0, Config.LIVES, Objects.requireNonNull(Config.getPlayerShips())[i],
                         Config.PLAYER_KEYS[i][0],
                         Config.PLAYER_KEYS[i][1],
