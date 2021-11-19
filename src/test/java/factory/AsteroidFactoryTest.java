@@ -11,11 +11,11 @@ class AsteroidFactoryTest {
 
     @Test
     void createAsteroid() {
-        Asteroid asteroid = asteroidFactory.createAsteroid(0);
+        Asteroid asteroid = asteroidFactory.createAsteroid(0, 100, 500);
         assertEquals(135, asteroid.getHealth());
         assertEquals(74.07407407407408, asteroid.getSpeed());
 
-        asteroid = asteroidFactory.createAsteroid(0);
+        asteroid = asteroidFactory.createAsteroid(0, 200, 300);
         assertEquals(273, asteroid.getHealth());
         assertEquals(36.63003663003663, asteroid.getSpeed());
     }

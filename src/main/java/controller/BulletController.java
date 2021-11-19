@@ -11,6 +11,10 @@ import view.BulletView;
 
 import java.util.*;
 
+
+/* TODO unificar tema controllers, armar una clase que se encargue de renderizar todos los "game objects" y usar
+    visitor para poder especificar la imagen a renderizar para cada tipo de objeto, manejar el tamaño y demás...
+ */
 public class BulletController {
     List<Bullet> bullets = new ArrayList<>();
     List<BulletView> bulletViews = new ArrayList<>();

@@ -4,8 +4,11 @@ import controller.BulletController;
 import javafx.scene.shape.Circle;
 import lombok.Getter;
 import model.Bullet;
+import observer.BulletObserver;
 import player.Player;
 import strategy.ShootingStrategy;
+
+import java.util.List;
 
 @Getter
 public class SingleShooting implements ShootingStrategy {
@@ -14,15 +17,16 @@ public class SingleShooting implements ShootingStrategy {
     private double lastShot;
 
     @Override
-    public void shoot(Player shooter, BulletController bulletController, double x, double y, double angle) {
+    public List<Bullet> shoot(BulletObserver shooter, double x, double y, double angle) {
         double currentTime = System.currentTimeMillis();
-        if(currentTime - lastShot < cooldown) return;
+        if(currentTime - lastShot < cooldown) return List.of();
         lastShot = currentTime;
         Circle shape = new Circle(5);
         shape.setLayoutX(x);
         shape.setLayoutY(y);
         shape.setRotate(angle - 90);
-        bulletController.addBullet(new Bullet(shape, 300.0, 50, shooter));
+        // bulletController.addBullet(new Bullet(shape, 300.0, 50, shooter));
+        return List.of(new Bullet(shape, 300.0, 50, shooter));
     }
 
     @Override

@@ -31,20 +31,12 @@ public class AsteroidController {
     }
 
     @SneakyThrows
-    public ImageView spawnAsteroid(Asteroid asteroid, ImageLoader imageLoader, double x, double y) {
+    public ImageView spawnAsteroid(Asteroid asteroid, ImageLoader imageLoader) {
         Image image = imageLoader.loadFromResources("asteroid.png", asteroid.getHealth(), asteroid.getHealth());
 
-        Random random = new Random();
-        if(random.nextBoolean()) {
-            x = random.nextBoolean() ? 0 - image.getWidth() : x + image.getWidth();
-            y = random.nextInt((int) y);
-        } else {
-            y = random.nextBoolean() ? 0 - image.getHeight(): y + image.getHeight();
-            x = random.nextInt((int) x);
-        }
-
         asteroids.add(asteroid);
-        AsteroidView asteroidView = new AsteroidView(image, x, y);
+        Circle shape = (Circle) asteroid.getShape();
+        AsteroidView asteroidView = new AsteroidView(image, shape.getCenterX() - asteroid.getHealth()/2, shape.getCenterY()- asteroid.getHealth()/2);
         asteroidViews.add(asteroidView);
         asteroid.getShape().setRotate(asteroidView.getRotate());
         return asteroidView.getImageView();

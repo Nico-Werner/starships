@@ -4,11 +4,12 @@ import controller.ShipController;
 import dto.PlayerDTO;
 import edu.austral.dissis.starships.game.KeyTracker;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import model.Ship;
+import observer.BulletObserver;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,26 +17,24 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @Builder
-public class Player implements Serializable {
+public class Player implements Serializable, BulletObserver {
     private int id;
     private int score;
     private int lives;
     private ShipController shipController;
 
-    KeyCode keyForward;
-    KeyCode keyRotateLeft;
-    KeyCode keyBackward;
-    KeyCode keyRotateRight;
-    KeyCode keyShoot;
+    // TODO unificarlo en una clase "input" para no manejar keycodes directamente.
+    // (idea: podría pasar el update al input y que devuelva un command...)
+    Input input;
 
     public void updateInput(Pane pane, KeyTracker keyTracker, double secondsSinceLastFrame) {
         if(isDead()) return;
         keyTracker.getKeySet().forEach(keyCode -> {
-            if (keyCode == keyForward) shipController.forward(secondsSinceLastFrame, pane);
-            else if (keyCode == keyBackward) shipController.backward(secondsSinceLastFrame, pane);
-            else if (keyCode == keyRotateLeft) shipController.rotateLeft(secondsSinceLastFrame);
-            else if (keyCode == keyRotateRight) shipController.rotateRight(secondsSinceLastFrame);
-            else if (keyCode == keyShoot) {
+            if (keyCode == input.getKeyForward()) shipController.forward(secondsSinceLastFrame, pane);
+            else if (keyCode == input.getKeyBackward()) shipController.backward(secondsSinceLastFrame, pane);
+            else if (keyCode == input.getKeyRotateLeft()) shipController.rotateLeft(secondsSinceLastFrame);
+            else if (keyCode == input.getKeyRotateRight()) shipController.rotateRight(secondsSinceLastFrame);
+            else if (keyCode == input.getKeyShoot()) {
                 shipController.fire(this);
                 List<ImageView> imageViews = shipController.getBulletController().renderBullets();
                 pane.getChildren().addAll(imageViews);
@@ -43,13 +42,15 @@ public class Player implements Serializable {
         });
     }
 
-    public void addPoints(double points) {
+    @Override
+    public void updateScore(double points) {
         score += points;
-        updatePoints();
+        shipController.getShipView().updatePoints(score);
     }
 
-    public void updatePoints() {
-        shipController.getShipView().updatePoints(score);
+    @Override
+    public boolean isSelf(Ship ship) {
+        return ship.equals(shipController.getShip());
     }
 
     public PlayerDTO toDTO() {
@@ -58,11 +59,11 @@ public class Player implements Serializable {
                 .score(score)
                 .lives(lives)
                 .shipController(shipController.toDTO())
-                .keyForward(keyForward)
-                .keyRotateLeft(keyRotateLeft)
-                .keyBackward(keyBackward)
-                .keyRotateRight(keyRotateRight)
-                .keyShoot(keyShoot)
+                .keyForward(input.getKeyForward())
+                .keyRotateLeft(input.getKeyRotateLeft())
+                .keyBackward(input.getKeyBackward())
+                .keyRotateRight(input.getKeyRotateRight())
+                .keyShoot(input.getKeyShoot())
                 .build();
     }
 

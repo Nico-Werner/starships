@@ -3,8 +3,11 @@ package strategy.impl;
 import controller.BulletController;
 import javafx.scene.shape.Circle;
 import model.Bullet;
+import observer.BulletObserver;
 import player.Player;
 import strategy.ShootingStrategy;
+
+import java.util.List;
 
 public class TripleShooting implements ShootingStrategy {
 
@@ -12,13 +15,18 @@ public class TripleShooting implements ShootingStrategy {
     private double lastShot;
 
     @Override
-    public void shoot(Player shooter, BulletController bulletController, double x, double y, double angle) {
+    public List<Bullet> shoot(BulletObserver shooter, double x, double y, double angle) {
         double currentTime = System.currentTimeMillis();
-        if(currentTime - lastShot < cooldown) return;
+        if(currentTime - lastShot < cooldown) return List.of();
         lastShot = currentTime;
-        bulletController.addBullet(createBullet(x, y, angle, shooter));
-        bulletController.addBullet(createBullet(x, y, angle - 15, shooter));
-        bulletController.addBullet(createBullet(x, y, angle + 15, shooter));
+//        bulletController.addBullet(createBullet(x, y, angle, shooter));
+//        bulletController.addBullet(createBullet(x, y, angle - 15, shooter));
+//        bulletController.addBullet(createBullet(x, y, angle + 15, shooter));
+        return List.of(
+                createBullet(x, y, angle, shooter),
+                createBullet(x, y, angle - 10, shooter),
+                createBullet(x, y, angle + 10, shooter)
+        );
     }
 
     @Override
@@ -31,7 +39,7 @@ public class TripleShooting implements ShootingStrategy {
         return cooldown;
     }
 
-    private Bullet createBullet(double x, double y, double angle, Player shooter) {
+    private Bullet createBullet(double x, double y, double angle, BulletObserver shooter) {
         Circle shape = new Circle(5);
         shape.setLayoutX(x);
         shape.setLayoutY(y);

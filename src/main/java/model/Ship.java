@@ -12,6 +12,8 @@ import lombok.Data;
 import player.Player;
 import strategy.ShootingStrategy;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -30,8 +32,8 @@ public class Ship implements MyCollider {
         this.speed = speed;
     }
 
-    public void fire(BulletController bulletController, Player shooter) {
-        shootingStrategy.shoot(shooter, bulletController, shape.getLayoutX() + ((Rectangle) shape).getWidth()/2 , shape.getLayoutY() + ((Rectangle) shape).getHeight()/2, shape.getRotate());
+    public List<Bullet> fire(Player shooter) {
+        return shootingStrategy.shoot(shooter, shape.getLayoutX() + ((Rectangle) shape).getWidth()/2 , shape.getLayoutY() + ((Rectangle) shape).getHeight()/2, shape.getRotate());
     }
 
     @Override
@@ -51,13 +53,13 @@ public class Ship implements MyCollider {
 
     @Override
     public void handleCollisionWith(Bullet bullet) {
-        if (bullet.getShooter() == null || bullet.getShooter().getShipController().getShip() != this) {
+        if (bullet.getShooter() == null || !bullet.getShooter().isSelf(this)) {
             health -= bullet.getDamage() / 10;
 
             bullet.setSpeed(0);
             if(bullet.getShooter() != null) {
-                if (health < 0) bullet.getShooter().addPoints(bullet.getDamage());
-                bullet.getShooter().addPoints(bullet.getDamage() / 10);
+                if (health < 0) bullet.getShooter().updateScore(bullet.getDamage());
+                bullet.getShooter().updateScore(bullet.getDamage() / 10);
             }
         }
     }

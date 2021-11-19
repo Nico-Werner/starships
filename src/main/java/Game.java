@@ -1,4 +1,5 @@
 import collider.MyCollider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.AsteroidController;
 import controller.PickupController;
 import dto.AsteroidDTO;
@@ -21,14 +22,17 @@ import lombok.Setter;
 import model.Asteroid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import player.Input;
 import player.Player;
 import serializer.GameSerializer;
 import serializer.GameState;
 import ui.MenuBox;
 import ui.MenuItem;
 import utils.Config;
+import utils.ConfigJson;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +48,9 @@ public class Game extends GameApplication {
 
     @Override
     public Parent initRoot(@NotNull GameContext context) {
+
         try {
+            Config.reloadConfig();
             return new GameManager(this, context).init();
         } catch (IOException e) {
             e.printStackTrace();
@@ -166,11 +172,11 @@ class GameManager {
             players = new Player[Config.PLAYERS];
             for (int i = 0; i < Config.PLAYERS; i++) {
                 players[i] = new Player(i, 0, Config.LIVES, Objects.requireNonNull(Config.getPlayerShips())[i],
-                        Config.PLAYER_KEYS[i][0],
+                        new Input(Config.PLAYER_KEYS[i][0],
                         Config.PLAYER_KEYS[i][1],
                         Config.PLAYER_KEYS[i][2],
                         Config.PLAYER_KEYS[i][3],
-                        Config.PLAYER_KEYS[i][4]);
+                        Config.PLAYER_KEYS[i][4]));
             }
             asteroidController = new AsteroidController();
             pickupController = new PickupController();
@@ -352,8 +358,8 @@ class MainTimer extends GameTimer {
 
     private void spawnAsteroid() {
         if(Math.random() * 100.0 < 5) {
-            Asteroid asteroid = asteroidFactory.createAsteroid();
-            ImageView imageView = asteroidController.spawnAsteroid(asteroid, imageLoader, pane.getWidth(), pane.getHeight());
+            Asteroid asteroid = asteroidFactory.createAsteroid(pane.getWidth(), pane.getHeight());
+            ImageView imageView = asteroidController.spawnAsteroid(asteroid, imageLoader);
             pane.getChildren().add(imageView);
         }
     }

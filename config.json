@@ -1,0 +1,24 @@
+{
+  "PLAYERS": 2,
+  "LIVES": 1,
+  "PLAYER_KEYS": [
+    [
+      "UP",
+      "LEFT",
+      "DOWN",
+      "RIGHT",
+      "SHIFT"
+    ],
+    [
+      "W",
+      "A",
+      "S",
+      "D",
+      "SPACE"
+    ]
+  ],
+  "SHIP_NAMES": [
+    "green-ship.png",
+    "starship.gif"
+  ]
+}

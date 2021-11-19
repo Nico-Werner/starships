@@ -68,7 +68,7 @@ public class ShipController implements Serializable {
     }
 
     public void fire(Player shooter) {
-        ship.fire(bulletController, shooter);
+        ship.fire(shooter).forEach(bulletController::addBullet);
     }
 
     public void moveShip(Vector2 to) {
