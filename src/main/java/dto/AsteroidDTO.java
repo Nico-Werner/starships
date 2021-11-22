@@ -1,7 +1,6 @@
 package dto;
 
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
+import edu.austral.dissis.starships.vector.Vector2;
 import lombok.Builder;
 import lombok.Data;
 import model.Asteroid;
@@ -20,10 +19,6 @@ public class AsteroidDTO implements Serializable {
     private double size;
 
     public Asteroid toAsteroid() {
-        Rectangle shape = new Rectangle(size, size);
-        shape.setLayoutX(posX);
-        shape.setLayoutY(posY);
-        shape.setRotate(rotate);
-        return new Asteroid(health, shape, speed);
+        return new Asteroid(health, Vector2.vector(posX, posY), rotate, speed);
     }
 }

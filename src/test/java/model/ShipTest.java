@@ -1,22 +1,20 @@
 package model;
 
 import edu.austral.dissis.starships.vector.Vector2;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import org.junit.jupiter.api.Test;
 import strategy.impl.SingleShooting;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ShipTest {
 
-    private final Ship ship = new Ship(100.0, new SingleShooting(), new Rectangle(100, 70), 100);
+    private final Ship ship = new Ship(100.0, new SingleShooting(), Vector2.vector(0, 0), 100);
 
     @Test
     void move() {
         ship.move(Vector2.vector(10, 10));
-        assertEquals(10, ship.getShape().getLayoutX());
-        assertEquals(10, ship.getShape().getLayoutY());
+        assertEquals(10, ship.getPosition().getX());
+        assertEquals(10, ship.getPosition().getY());
     }
 
     @Test
@@ -35,14 +33,14 @@ class ShipTest {
     @Test
     void testHandleCollisionWithAsteroid() {
         assertEquals(100, ship.getHealth());
-        ship.handleCollisionWith(new Asteroid(100.0, new Circle(100), 100));
+        ship.handleCollisionWith(new Asteroid(100.0, Vector2.vector(0, 0), 0, 100));
         assertEquals(50, ship.getHealth());
     }
 
     @Test
     void testHandleCollisionWithBullet() {
         assertEquals(100, ship.getHealth());
-        ship.handleCollisionWith(new Bullet(new Circle(100), 100, 100 , null));
+        ship.handleCollisionWith(new Bullet(Vector2.vector(0, 0), 100, 100 , 10));
         assertEquals(90, ship.getHealth());
     }
 }

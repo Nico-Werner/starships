@@ -1,30 +1,17 @@
-import collider.MyCollider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.AsteroidController;
-import controller.BulletController;
+import controller.GameController;
 import controller.PickupController;
-import controller.ShipController;
 import dto.AsteroidDTO;
 import dto.PickupDTO;
 import dto.PlayerDTO;
-import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
-import edu.austral.dissis.starships.vector.Vector2;
-import factory.AsteroidFactory;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import lombok.Setter;
-import model.Asteroid;
-import model.GameObject;
-import model.Ship;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import player.Input;
@@ -34,12 +21,10 @@ import serializer.GameState;
 import ui.MenuBox;
 import ui.MenuItem;
 import utils.Config;
-import utils.ConfigJson;
-import view.ImageRenderer;
 
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Game extends GameApplication {
@@ -189,7 +174,6 @@ class GameManager {
             players = state.getPlayers().stream().map(PlayerDTO::toPlayer).toArray(Player[]::new);
             asteroidController = new AsteroidController(state.getAsteroids().stream().map(AsteroidDTO::toAsteroid).collect(Collectors.toList()));
             pickupController = new PickupController(state.getPickups().stream().map(PickupDTO::toPickup).collect(Collectors.toList()));
-            pane.getChildren().addAll(pickupController.getViews());
         }
 
         for (Player player : players) {
@@ -200,12 +184,7 @@ class GameManager {
         }
 
         if(mainTimer == null) mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
-        mainTimer.setPlayers(players);
-        mainTimer.setKeyTracker(context.getKeyTracker());
-        mainTimer.setImageLoader(imageLoader);
-        mainTimer.setPane(pane);
-        mainTimer.setAsteroidController(asteroidController);
-        mainTimer.setPickupController(pickupController);
+        mainTimer.loadController(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
 
         pane.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.P) {
@@ -272,28 +251,12 @@ class GameManager {
 @Setter
 class MainTimer extends GameTimer {
 
-    //TODO: dejarle funcionalidad exclusiva de llamar al nextFrame y por composición avisarle a otra clase GameManager
-    // el pane y el imageLoader van a ir a parar al tema de renderizado
-    Player[] players;
-    AsteroidController asteroidController;
-    PickupController pickupController;
-    KeyTracker keyTracker;
-    ImageLoader imageLoader;
-    Pane pane;
-    AsteroidFactory asteroidFactory = new AsteroidFactory();
-    CollisionEngine collisionEngine = new CollisionEngine();
-    ImageRenderer imageRenderer;
+    GameController gameController;
 
     boolean paused = false;
 
     public MainTimer(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane, AsteroidController asteroidController, PickupController pickupController) {
-        this.players = players;
-        this.keyTracker = keyTracker;
-        this.imageLoader = imageLoader;
-        this.pane = pane;
-        this.asteroidController = asteroidController;
-        this.pickupController = pickupController;
-        this.imageRenderer = new ImageRenderer(pane);
+        gameController = new GameController(players, keyTracker, pane, asteroidController, pickupController);
     }
 
     @Override
@@ -302,117 +265,16 @@ class MainTimer extends GameTimer {
             secondsSinceLastFrame = 0;
             paused = false;
         }
-        pane.requestFocus();
 
-        reviveDeadPlayers();
-
-        List<GameObject> gameObjects = new ArrayList<>();
-        gameObjects.addAll(Arrays.stream(players).map(Player::getShipController).map(ShipController::getBulletController).map(BulletController::getBullets).flatMap(Collection::stream).collect(Collectors.toList()));
-        gameObjects.addAll(asteroidController.getAsteroids());
-        gameObjects.addAll(pickupController.getPickups());
-
-        updatePosition(gameObjects, secondsSinceLastFrame);
-
-        gameObjects.addAll(Arrays.stream(players).map(Player::getShipController).map(ShipController::getShip).collect(Collectors.toList()));
-        collisionEngine.checkCollisions(getColliders());
-
-        imageRenderer.renderObjects(gameObjects);
-
-        updateHealths();
-        updateDeaths();
-        spawnAsteroid();
-        spawnPickup();
-
-        if(Arrays.stream(players).allMatch(Player::isDead)) {
+        if(gameController.isOver()) {
             stop();
-            StackPane gameOverRectangle = createGameOverRectangle();
-            gameOverRectangle.translateXProperty().setValue(pane.getWidth() / 2 - gameOverRectangle.getPrefWidth() / 2);
-            gameOverRectangle.translateYProperty().setValue(pane.getHeight() / 2 - gameOverRectangle.getPrefHeight() / 2);
-            pane.getChildren().add(gameOverRectangle);
+            gameController.gameOver();
         }
+
+        gameController.update(secondsSinceLastFrame);
     }
 
-    private void reviveDeadPlayers() {
-        for (Player player : players) {
-            if (player.getLives() > 0 && player.getShipController().getShip().getHealth() <= 0) {
-                player.setShipController(Objects.requireNonNull(Config.getPlayerShips())[player.getId()]);
-                pane.getChildren().add(player.getShipController().getShipView().getImageView());
-                pane.getChildren().add(player.getShipController().getShipView().getHealthView());
-                pane.getChildren().add(player.getShipController().getShipView().getPoints());
-            }
-        }
-    }
-
-    private StackPane createGameOverRectangle() {
-        Rectangle rectangle = new Rectangle(600, 200);
-        rectangle.setFill(Color.BLACK);
-        rectangle.setOpacity(0.4);
-        rectangle.setLayoutX(150);
-        rectangle.setLayoutY(150);
-
-        Text text = new Text("GAME OVER");
-        text.setFont(Font.font(100));
-        text.setFill(Color.WHITE);
-        text.setX(150);
-        text.setY(150);
-
-        StackPane stackPane = new StackPane(rectangle, text);
-        stackPane.setPrefSize(600, 200);
-
-        return stackPane;
-    }
-
-    private void updateHealths() {
-        for (Player player : players) {
-            player.getShipController().updateHealth();
-        }
-    }
-
-    private void spawnPickup() {
-        if(Math.random() * 1000 < 3 && pickupController.getPickups().size() < 5) {
-            pickupController.spawnPickup(imageLoader, pane.getWidth(), pane.getHeight());
-        }
-    }
-
-    private void spawnAsteroid() {
-        if(Math.random() * 100.0 < 5) {
-            Asteroid asteroid = asteroidFactory.createAsteroid(pane.getWidth(), pane.getHeight());
-            asteroidController.spawnAsteroid(asteroid);
-        }
-    }
-
-    private void updatePosition(List<GameObject> gameObjects, Double secondsSinceLastFrame) {
-        for(Player player : players) {
-            player.updateInput(pane, keyTracker, secondsSinceLastFrame);
-        }
-        for (GameObject gameObject : gameObjects) {
-            Vector2 movementVector = Vector2.vectorFromModule((gameObject.getSpeed() * secondsSinceLastFrame), (Math.toRadians(gameObject.getDirection())));
-            Vector2 from = Vector2.vector(gameObject.getPosition().getX(), gameObject.getPosition().getY());
-            Vector2 to = from.add(movementVector);
-            gameObject.move(to);
-        }
-    }
-
-    private List<MyCollider> getColliders() {
-        List<MyCollider> colliders = new ArrayList<>();
-        for (Player player : players) {
-            colliders.add(player.getShipController().getShip());
-            colliders.addAll(player.getShipController().getBulletController().getBullets());
-        }
-        colliders.addAll(asteroidController.getAsteroids());
-        colliders.addAll(pickupController.getPickups());
-        return colliders;
-    }
-
-    private void updateDeaths() {
-        for(Player player : players) {
-            if(player.isShipDead()) {
-//                 pane.getChildren().remove(player.updateDeath());
-            }
-             player.getShipController().getBulletController().removeDeadBullets(pane.getWidth(), pane.getHeight());
-        }
-        asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());
-        asteroidController.updateDeaths();
-        pane.getChildren().removeAll(pickupController.getInactive());
+    public void loadController(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane, AsteroidController asteroidController, PickupController pickupController) {
+        gameController = new GameController(players, keyTracker, pane, asteroidController, pickupController);
     }
 }

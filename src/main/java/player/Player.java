@@ -8,11 +8,11 @@ import javafx.scene.layout.Pane;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import model.Asteroid;
 import model.Ship;
 import observer.BulletObserver;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -42,8 +42,16 @@ public class Player implements Serializable, BulletObserver {
     }
 
     @Override
-    public void updateScore(double points) {
-        score += points;
+    public void onHit(double damage, Asteroid asteroid) {
+        score += damage;
+        if(asteroid.shouldBeRemoved()) score += damage;
+        shipController.getShipView().updatePoints(score);
+    }
+
+    @Override
+    public void onHit(double damage, Ship ship) {
+        score += damage / 10;
+        if(ship.shouldBeRemoved()) score += damage / 10;
         shipController.getShipView().updatePoints(score);
     }
 
@@ -70,11 +78,10 @@ public class Player implements Serializable, BulletObserver {
         return shipController.getShip().getHealth() <= 0 && lives <= 0;
     }
 
-    public ImageView updateDeath() {
+    public void updateDeath() {
         ImageView imageView = shipController.updateDeath();
-        if(imageView == null) return null;
+        if(imageView == null) return;
         lives--;
-        return imageView;
     }
 
     public boolean isShipDead() {

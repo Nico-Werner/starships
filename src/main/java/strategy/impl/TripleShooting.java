@@ -1,10 +1,7 @@
 package strategy.impl;
 
-import controller.BulletController;
-import javafx.scene.shape.Circle;
+import edu.austral.dissis.starships.vector.Vector2;
 import model.Bullet;
-import observer.BulletObserver;
-import player.Player;
 import strategy.ShootingStrategy;
 
 import java.util.List;
@@ -15,7 +12,7 @@ public class TripleShooting implements ShootingStrategy {
     private double lastShot;
 
     @Override
-    public List<Bullet> shoot(BulletObserver shooter, double x, double y, double angle) {
+    public List<Bullet> shoot(double x, double y, double angle) {
         double currentTime = System.currentTimeMillis();
         if(currentTime - lastShot < cooldown) return List.of();
         lastShot = currentTime;
@@ -23,9 +20,9 @@ public class TripleShooting implements ShootingStrategy {
 //        bulletController.addBullet(createBullet(x, y, angle - 15, shooter));
 //        bulletController.addBullet(createBullet(x, y, angle + 15, shooter));
         return List.of(
-                createBullet(x, y, angle, shooter),
-                createBullet(x, y, angle - 10, shooter),
-                createBullet(x, y, angle + 10, shooter)
+                createBullet(x, y, angle),
+                createBullet(x, y, angle - 10),
+                createBullet(x, y, angle + 10)
         );
     }
 
@@ -39,11 +36,7 @@ public class TripleShooting implements ShootingStrategy {
         return cooldown;
     }
 
-    private Bullet createBullet(double x, double y, double angle, BulletObserver shooter) {
-        Circle shape = new Circle(5);
-        shape.setLayoutX(x);
-        shape.setLayoutY(y);
-        shape.setRotate(angle - 90);
-        return new Bullet(shape, 300.0, 50, shooter);
+    private Bullet createBullet(double x, double y, double angle) {
+        return new Bullet(Vector2.vector(x, y), Math.toRadians(angle - 90), 300.0, 50);
     }
 }

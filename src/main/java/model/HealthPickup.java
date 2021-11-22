@@ -4,8 +4,6 @@ import collider.MyCollider;
 import dto.PickupDTO;
 import dto.PickupType;
 import edu.austral.dissis.starships.vector.Vector2;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +17,11 @@ public class HealthPickup implements Pickup {
     @Setter
     private boolean active = true;
 
-    private final Shape shape = new Rectangle(50, 50);
+    private final Vector2 position;
     private final PickupType type = PickupType.HEALTH;
 
     public HealthPickup(int xPos, int yPos) {
-        shape.setLayoutX(xPos);
-        shape.setLayoutY(yPos);
+        position = Vector2.vector(xPos, yPos);
 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -36,7 +33,7 @@ public class HealthPickup implements Pickup {
 
     @Override
     public void handleCollisionWith(@NotNull MyCollider collider) {
-        collider.handleCollisionWith(this);
+        collider.getGameObject().handleCollisionWith(this);
     }
 
     @Override
@@ -48,7 +45,7 @@ public class HealthPickup implements Pickup {
 
     @Override
     public Vector2 getPosition() {
-        return Vector2.vector(shape.getLayoutX(), shape.getLayoutY());
+        return position;
     }
 
     @Override
@@ -59,8 +56,8 @@ public class HealthPickup implements Pickup {
     @Override
     public PickupDTO toDTO() {
         return PickupDTO.builder()
-                .xPos(shape.getLayoutX())
-                .yPos(shape.getLayoutY())
+                .xPos(position.getX())
+                .yPos(position.getY())
                 .type(type)
                 .build();
     }

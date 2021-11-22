@@ -4,15 +4,16 @@ import dto.ShipControllerDTO;
 import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import model.Bullet;
 import model.Ship;
 import player.Player;
 import view.ShipView;
 
 import java.io.Serializable;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -24,8 +25,8 @@ public class ShipController implements Serializable {
 
     public void forward(Double secondsSinceLastFrame, Pane pane) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        Vector2 movementVector = Vector2.vectorFromModule(movement, (Math.toRadians(ship.getShape().getRotate()) - Math.PI/2));
-        Vector2 from = Vector2.vector((float) ship.getPosition().getX(), (float) ship.getPosition().getY());
+        Vector2 movementVector = Vector2.vectorFromModule(movement, Math.toRadians(ship.getDirection()) - Math.PI/2);
+        Vector2 from = Vector2.vector(ship.getPosition().getX(), ship.getPosition().getY());
         Vector2 to = from.add(movementVector);
         if(isInBounds(pane, to)) {
             moveShip(to);
@@ -38,7 +39,7 @@ public class ShipController implements Serializable {
 
     public void backward(Double secondsSinceLastFrame, Pane pane) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        Vector2 movementVector = Vector2.vectorFromModule(-movement, (Math.toRadians(ship.getShape().getRotate()) - Math.PI/2));
+        Vector2 movementVector = Vector2.vectorFromModule(movement, Math.toRadians(ship.getDirection()) + Math.PI/2);
         Vector2 from = Vector2.vector(ship.getPosition().getX(), ship.getPosition().getY());
         Vector2 to = from.add(movementVector);
         if(isInBounds(pane, to)) {
@@ -48,12 +49,12 @@ public class ShipController implements Serializable {
 
     public void rotateLeft(Double secondsSinceLastFrame) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        ship.getShape().setRotate(ship.getShape().getRotate() - movement);
+        ship.setDirection(ship.getDirection() - movement);
     }
 
     public void rotateRight(Double secondsSinceLastFrame) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        ship.getShape().setRotate(ship.getShape().getRotate() + movement);
+        ship.setDirection(ship.getDirection() + movement);
     }
 
     public ImageView updateDeath() {
@@ -66,7 +67,9 @@ public class ShipController implements Serializable {
     }
 
     public void fire(Player shooter) {
-        ship.fire(shooter).forEach(bulletController::addBullet);
+        List<Bullet> bullets = ship.fire();
+        bullets.forEach(bulletController::addBullet);
+        bullets.forEach(bullet -> bullet.register(shooter));
     }
 
     public void moveShip(Vector2 to) {

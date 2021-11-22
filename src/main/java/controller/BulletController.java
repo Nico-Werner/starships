@@ -3,14 +3,9 @@ package controller;
 import dto.BulletControllerDTO;
 import model.Bullet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-
-/* TODO unificar tema controllers, armar una clase que se encargue de renderizar todos los "game objects" y usar
-    visitor para poder especificar la imagen a renderizar para cada tipo de objeto, manejar el tamaño y demás...
-    Podría usar un Map<GameObject, ImageView> y si no la tiene cargarla, si ya la tiene simplemente actualizarla acorde
-    a la posición. Cargar la imagen una sola vez.
- */
 public class BulletController {
     List<Bullet> bullets = new ArrayList<>();
 
@@ -34,7 +29,7 @@ public class BulletController {
             if (bullet.getSpeed() == 0) {
                 bullets.remove(bullet);
             }
-            if(bullet.getShape().getLayoutX() < -100 || bullet.getShape().getLayoutX() > width + 100 || bullet.getShape().getLayoutY() < -100 || bullet.getShape().getLayoutY() > height + 100) {
+            if(bullet.getPosition().getX() < -100 || bullet.getPosition().getX() > width + 100 || bullet.getPosition().getY() < -100 || bullet.getPosition().getY() > height + 100) {
                 bullets.remove(bullet);
             }
         }

@@ -1,6 +1,5 @@
 package view;
 
-import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import lombok.Getter;
@@ -14,10 +13,5 @@ public class BulletView implements View {
         this.imageView.setLayoutX(layoutX);
         this.imageView.setLayoutY(layoutY);
         this.imageView.setRotate(rotate);
-    }
-
-    public void move(Vector2 to) {
-        this.imageView.setLayoutX(to.getX());
-        this.imageView.setLayoutY(to.getY());
     }
 }

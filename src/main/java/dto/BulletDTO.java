@@ -1,6 +1,6 @@
 package dto;
 
-import javafx.scene.shape.Circle;
+import edu.austral.dissis.starships.vector.Vector2;
 import lombok.Builder;
 import lombok.Data;
 import model.Bullet;
@@ -18,10 +18,6 @@ public class BulletDTO implements Serializable {
     double damage;
 
     public Bullet toBullet() {
-        Circle shape = new Circle(radius);
-        shape.setRotate(rotate);
-        shape.setLayoutX(posX);
-        shape.setLayoutY(posY);
-        return new Bullet(shape, speed, damage, null);
+        return new Bullet(Vector2.vector(posX, posY), rotate, speed, damage);
     }
 }

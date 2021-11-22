@@ -1,7 +1,6 @@
 package dto;
 
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import edu.austral.dissis.starships.vector.Vector2;
 import lombok.Builder;
 import lombok.Data;
 import model.Ship;
@@ -24,15 +23,11 @@ public class ShipDTO implements Serializable {
     private ShootingStrategy shootingStrategy;
 
     public Ship toShip() {
-        Shape shape = new Rectangle(70, 45);
-        shape.setLayoutX(posX);
-        shape.setLayoutY(posY);
-        shape.setRotate(angle);
-
         Ship ship = Ship.builder()
                 .health(health)
                 .maxHealth(maxHealth)
-                .shape(shape)
+                .position(Vector2.vector(posX, posY))
+                .direction(angle)
                 .speed(speed)
                 .shootingStrategy(shootingStrategy)
                 .build();

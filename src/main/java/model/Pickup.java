@@ -1,11 +1,10 @@
 package model;
 
-import collider.MyCollider;
 import dto.PickupDTO;
 import dto.PickupType;
 import edu.austral.dissis.starships.vector.Vector2;
 
-public interface Pickup extends MyCollider, GameObject {
+public interface Pickup extends GameObject {
     boolean isActive();
     void setActive(boolean active);
 

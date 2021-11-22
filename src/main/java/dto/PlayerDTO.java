@@ -8,6 +8,7 @@ import player.Input;
 import player.Player;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder
@@ -35,7 +36,7 @@ public class PlayerDTO implements Serializable {
                 .input(new Input(keyForward, keyRotateLeft, keyBackward, keyRotateRight, keyShoot))
                 .build();
 
-        shipController.getBulletController().getBullets().forEach(bullet -> bullet.setShooter(player));
+        shipController.getBulletController().getBullets().forEach(bullet -> bullet.setObservers(List.of(player)));
         return player;
     }
 }

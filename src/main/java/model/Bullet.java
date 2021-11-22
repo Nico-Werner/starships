@@ -3,50 +3,47 @@ package model;
 import collider.MyCollider;
 import dto.BulletDTO;
 import edu.austral.dissis.starships.vector.Vector2;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Shape;
 import lombok.Data;
 import observer.BulletObserver;
-import org.jetbrains.annotations.Nullable;
+import observer.Observable;
 import visitor.GameObjectVisitor;
 
-@Data
-public class Bullet implements MyCollider, GameObject {
+import java.util.ArrayList;
+import java.util.List;
 
-    Shape shape;
+@Data
+public class Bullet implements GameObject, Observable {
+
+    Vector2 position;
+    double direction;
     double speed;
     double damage;
 
-    //TODO usar observer (aca tienen acceso total al player, no está bueno) -> mejor depender de lo mínimo en una interfaz
-    // además permite delegar el tema de asignar puntos
-    // hacerlo lista. hacerle la interfaz observable (seguir el patron mas al pie)
-    @Nullable
-    BulletObserver shooter;
+    List<BulletObserver> observers = new ArrayList<>();
 
-    public Bullet(Circle circle, double speed, double damage, @Nullable BulletObserver shooter) {
-        shape = circle;
+    public Bullet(Vector2 position, double direction, double speed, double damage) {
+        this.position = position;
+        this.direction = direction;
         this.speed = speed;
         this.damage = damage;
-        this.shooter = shooter;
     }
 
-    @Override
     public void handleCollisionWith(MyCollider collider) {
         // double dispatch
-        collider.handleCollisionWith(this);
+        collider.getGameObject().handleCollisionWith(this);
     }
 
     public void move(Vector2 to) {
-        shape.setLayoutX(to.getX());
-        shape.setLayoutY(to.getY());
+        position = to;
     }
 
     @Override
     public void handleCollisionWith(Asteroid asteroid) {
         speed = 0;
-        if(shooter != null) {
-            if(asteroid.getHealth() < 0) shooter.updateScore(damage);
-            shooter.updateScore(damage);
+        if(observers != null) {
+            for (BulletObserver observer : observers) {
+                observer.onHit(damage, asteroid);
+            }
         }
     }
 
@@ -54,21 +51,21 @@ public class Bullet implements MyCollider, GameObject {
         return BulletDTO.builder()
                 .speed(speed)
                 .damage(damage)
-                .posX(shape.getLayoutX())
-                .posY(shape.getLayoutY())
-                .rotate(shape.getRotate())
-                .radius(((Circle) shape).getRadius())
+                .posX(position.getX())
+                .posY(position.getY())
+                .rotate(direction)
+                .radius(5)
                 .build();
     }
 
     @Override
     public Vector2 getPosition() {
-        return Vector2.vector(shape.getLayoutX(), shape.getLayoutY());
+        return position;
     }
 
     @Override
     public double getDirection() {
-        return shape.getRotate();
+        return direction;
     }
 
     @Override
@@ -79,5 +76,15 @@ public class Bullet implements MyCollider, GameObject {
     @Override
     public void accept(GameObjectVisitor visitor) {
         visitor.visitBullet(this);
+    }
+
+    @Override
+    public void register(BulletObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void unregister(BulletObserver observer) {
+        observers.remove(observer);
     }
 }

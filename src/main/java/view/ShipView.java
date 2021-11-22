@@ -41,22 +41,6 @@ public class ShipView implements View{
         points.setText("0");
     }
 
-    public double getLayoutX() {
-        return imageView.getLayoutX();
-    }
-
-    public double getLayoutY() {
-        return imageView.getLayoutY();
-    }
-
-    public double getRotate() {
-        return imageView.getRotate();
-    }
-
-    public void setRotate(double v) {
-        imageView.setRotate(v);
-    }
-
     public void move(Vector2 to) {
         imageView.setLayoutX(to.getX());
         imageView.setLayoutY(to.getY());

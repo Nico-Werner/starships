@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.BulletController;
 import controller.ShipController;
 import edu.austral.dissis.starships.file.ImageLoader;
+import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.input.KeyCode;
-import javafx.scene.shape.Rectangle;
 import lombok.SneakyThrows;
 import model.Ship;
 import strategy.impl.SingleShooting;
@@ -27,8 +27,8 @@ public class Config {
     public static ShipController[] getPlayerShips() {
         try {
             return new ShipController[]{
-                    new ShipController(new ShipView(imageLoader.loadFromResources(SHIP_NAMES[0], 100, 100), 200, 200), new Ship(200.0, new SingleShooting(), new Rectangle(70, 45), 100), new BulletController()),
-                    new ShipController(new ShipView(imageLoader.loadFromResources(SHIP_NAMES[1], 100, 100), 1000, 200), new Ship(200.0, new SingleShooting(), new Rectangle(70, 45), 100), new BulletController())
+                    new ShipController(new ShipView(imageLoader.loadFromResources(SHIP_NAMES[0], 100, 100), 200, 200), new Ship(200.0, new SingleShooting(), Vector2.vector(200, 200), 100), new BulletController()),
+                    new ShipController(new ShipView(imageLoader.loadFromResources(SHIP_NAMES[1], 100, 100), 1000, 200), new Ship(200.0, new SingleShooting(), Vector2.vector(1000, 200), 100), new BulletController())
             };
         } catch (IOException e) {
             e.printStackTrace();

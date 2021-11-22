@@ -52,7 +52,7 @@ public class ImageVisitor implements GameObjectVisitor {
 
     @Override
     public void visitBullet(Bullet bullet) {
-        result = new BulletView(bulletImage, bullet.getPosition().getX(), bullet.getPosition().getY(), bullet.getShape().getRotate());
+        result = new BulletView(bulletImage, bullet.getPosition().getX(), bullet.getPosition().getY(), bullet.getDirection());
     }
 
     @Override

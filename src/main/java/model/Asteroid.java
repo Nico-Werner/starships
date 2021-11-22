@@ -3,9 +3,6 @@ package model;
 import collider.MyCollider;
 import dto.AsteroidDTO;
 import edu.austral.dissis.starships.vector.Vector2;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import visitor.GameObjectVisitor;
@@ -14,24 +11,20 @@ import java.io.Serializable;
 
 @AllArgsConstructor
 @Data
-public class Asteroid implements MyCollider, Serializable, GameObject {
+public class Asteroid implements Serializable, GameObject {
     Double health;
-    Shape shape;
+    Vector2 position;
+    double direction;
     double speed;
 
-    @Override
     public void handleCollisionWith(MyCollider collider) {
-        collider.handleCollisionWith(this);
+        collider.getGameObject().handleCollisionWith(this);
     }
 
     public void move(Vector2 to) {
-//        ((Circle) shape).setCenterX(to.getX() + health/2);
-//        ((Circle) shape).setCenterY(to.getY() + health/2);
-        shape.setLayoutX(to.getX());
-        shape.setLayoutY(to.getY());
+        position = to;
     }
 
-    @Override
     public void handleCollisionWith(Bullet bullet) {
         health = health - bullet.getDamage();
     }
@@ -39,23 +32,22 @@ public class Asteroid implements MyCollider, Serializable, GameObject {
     public AsteroidDTO toDTO() {
         return AsteroidDTO.builder()
                 .health(health)
-                .posX(shape.getLayoutX())
-                .posY(shape.getLayoutY())
-                .rotate(shape.getRotate())
-                .size(((Rectangle) shape).getWidth())
+                .posX(position.getX())
+                .posY(position.getY())
+                .rotate(direction)
+                .size(health)
                 .speed(speed)
                 .build();
     }
 
     @Override
     public Vector2 getPosition() {
-        return Vector2.vector(shape.getLayoutX(), shape.getLayoutY());
-//        return Vector2.vector(((Circle) shape).getCenterX(), ((Circle) shape).getCenterY());
+        return position;
     }
 
     @Override
     public double getDirection() {
-        return shape.getRotate();
+        return direction;
     }
 
     @Override
