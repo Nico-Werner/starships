@@ -11,16 +11,25 @@ import lombok.Builder;
 import lombok.Data;
 import player.Player;
 import strategy.ShootingStrategy;
+import visitor.GameObjectVisitor;
 
 import java.util.List;
 
+// TODO: por composicion separar la logica del modelo
+// TODO: modelo inmutable
 @Data
 @Builder
 @AllArgsConstructor
-public class Ship implements MyCollider {
+public class Ship implements MyCollider, GameObject {
     private Double health;
     private Double maxHealth;
     private ShootingStrategy shootingStrategy;
+
+    // TODO: no tener el shape. Puede salir facil con lo de renderizar, a la hora de renderizar se le puede asignar la
+    //  shape. Solo manejarlo con el vector 2 y demas... Renderable element con handler (para colisiones)
+    //  y view. De alguna forma hay que relacionarlo con el modelo real y manejar la logica de
+    //  colisiones. En el renderable element no tener referencia directa al modelo, sino al myCollider
+    //  (con otro nombre). El renderableElement va a tener un handleCollisions y lo delega por composición
     private Shape shape;
     private double speed;
 
@@ -80,5 +89,25 @@ public class Ship implements MyCollider {
                 .posY(shape.getLayoutY())
                 .angle(shape.getRotate())
                 .build();
+    }
+
+    @Override
+    public Vector2 getPosition() {
+        return Vector2.vector(shape.getLayoutX(), shape.getLayoutY());
+    }
+
+    @Override
+    public double getDirection() {
+        return shape.getRotate();
+    }
+
+    @Override
+    public boolean shouldBeRemoved() {
+        return health <= 0;
+    }
+
+    @Override
+    public void accept(GameObjectVisitor visitor) {
+        visitor.visitShip(this);
     }
 }

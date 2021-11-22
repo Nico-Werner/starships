@@ -25,6 +25,7 @@ public class Player implements Serializable, BulletObserver {
 
     // TODO unificarlo en una clase "input" para no manejar keycodes directamente.
     // (idea: podría pasar el update al input y que devuelva un command...)
+    // podria ser con generics y despues en una implementacion especificar que es para keyCode.
     Input input;
 
     public void updateInput(Pane pane, KeyTracker keyTracker, double secondsSinceLastFrame) {
@@ -36,8 +37,6 @@ public class Player implements Serializable, BulletObserver {
             else if (keyCode == input.getKeyRotateRight()) shipController.rotateRight(secondsSinceLastFrame);
             else if (keyCode == input.getKeyShoot()) {
                 shipController.fire(this);
-                List<ImageView> imageViews = shipController.getBulletController().renderBullets();
-                pane.getChildren().addAll(imageViews);
             }
         });
     }

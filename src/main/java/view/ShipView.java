@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 
 @Data
-public class ShipView {
+public class ShipView implements View{
     ImageView imageView;
     Group healthView;
     Rectangle healthFill = new Rectangle(100, 10);

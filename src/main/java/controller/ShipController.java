@@ -24,8 +24,8 @@ public class ShipController implements Serializable {
 
     public void forward(Double secondsSinceLastFrame, Pane pane) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        Vector2 movementVector = Vector2.vectorFromModule(movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
-        Vector2 from = Vector2.vector((float) shipView.getLayoutX(), (float) shipView.getLayoutY());
+        Vector2 movementVector = Vector2.vectorFromModule(movement, (Math.toRadians(ship.getShape().getRotate()) - Math.PI/2));
+        Vector2 from = Vector2.vector((float) ship.getPosition().getX(), (float) ship.getPosition().getY());
         Vector2 to = from.add(movementVector);
         if(isInBounds(pane, to)) {
             moveShip(to);
@@ -38,8 +38,8 @@ public class ShipController implements Serializable {
 
     public void backward(Double secondsSinceLastFrame, Pane pane) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        Vector2 movementVector = Vector2.vectorFromModule(-movement, (Math.toRadians(shipView.getRotate()) - Math.PI/2));
-        Vector2 from = Vector2.vector(shipView.getLayoutX(), shipView.getLayoutY());
+        Vector2 movementVector = Vector2.vectorFromModule(-movement, (Math.toRadians(ship.getShape().getRotate()) - Math.PI/2));
+        Vector2 from = Vector2.vector(ship.getPosition().getX(), ship.getPosition().getY());
         Vector2 to = from.add(movementVector);
         if(isInBounds(pane, to)) {
             moveShip(to);
@@ -48,14 +48,12 @@ public class ShipController implements Serializable {
 
     public void rotateLeft(Double secondsSinceLastFrame) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        shipView.setRotate(shipView.getRotate() - movement);
-        ship.getShape().setRotate(shipView.getRotate() - movement);
+        ship.getShape().setRotate(ship.getShape().getRotate() - movement);
     }
 
     public void rotateRight(Double secondsSinceLastFrame) {
         double movement = secondsSinceLastFrame * ship.getSpeed();
-        shipView.setRotate(shipView.getRotate() + movement);
-        ship.getShape().setRotate(shipView.getRotate() + movement);
+        ship.getShape().setRotate(ship.getShape().getRotate() + movement);
     }
 
     public ImageView updateDeath() {
@@ -72,8 +70,8 @@ public class ShipController implements Serializable {
     }
 
     public void moveShip(Vector2 to) {
-        shipView.move(to);
-        ship.move(Vector2.vector(to.getX() + (shipView.getWidth() - ((Rectangle) ship.getShape()).getWidth())/2, to.getY() + (shipView.getHeight() - ((Rectangle) ship.getShape()).getHeight())/2));
+        ship.move(to);
+        //ship.move(Vector2.vector(to.getX() + (shipView.getWidth() - ((Rectangle) ship.getShape()).getWidth())/2, to.getY() + (shipView.getHeight() - ((Rectangle) ship.getShape()).getHeight())/2));
     }
 
     public void updateHealth() {

@@ -5,7 +5,7 @@ import javafx.scene.image.ImageView;
 import lombok.Data;
 
 @Data
-public class PickupView {
+public class PickupView implements View {
     ImageView imageView;
 
     public PickupView(Image image, double x, double y) {

@@ -8,16 +8,18 @@ import javafx.scene.shape.Shape;
 import lombok.Data;
 import observer.BulletObserver;
 import org.jetbrains.annotations.Nullable;
+import visitor.GameObjectVisitor;
 
 @Data
-public class Bullet implements MyCollider {
+public class Bullet implements MyCollider, GameObject {
 
     Shape shape;
     double speed;
     double damage;
 
-    // TODO usar observer (aca tienen acceso total al player, no está bueno) -> mejor depender de lo mínimo en una interfaz
+    //TODO usar observer (aca tienen acceso total al player, no está bueno) -> mejor depender de lo mínimo en una interfaz
     // además permite delegar el tema de asignar puntos
+    // hacerlo lista. hacerle la interfaz observable (seguir el patron mas al pie)
     @Nullable
     BulletObserver shooter;
 
@@ -57,5 +59,25 @@ public class Bullet implements MyCollider {
                 .rotate(shape.getRotate())
                 .radius(((Circle) shape).getRadius())
                 .build();
+    }
+
+    @Override
+    public Vector2 getPosition() {
+        return Vector2.vector(shape.getLayoutX(), shape.getLayoutY());
+    }
+
+    @Override
+    public double getDirection() {
+        return shape.getRotate();
+    }
+
+    @Override
+    public boolean shouldBeRemoved() {
+        return speed == 0;
+    }
+
+    @Override
+    public void accept(GameObjectVisitor visitor) {
+        visitor.visitBullet(this);
     }
 }

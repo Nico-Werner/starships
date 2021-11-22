@@ -16,6 +16,7 @@ public class SingleShooting implements ShootingStrategy {
     private double cooldown = 500;
     private double lastShot;
 
+    // TODO: ver forma de sacar el shooter y que se asigne despues, que esto solo cree las bullets.
     @Override
     public List<Bullet> shoot(BulletObserver shooter, double x, double y, double angle) {
         double currentTime = System.currentTimeMillis();

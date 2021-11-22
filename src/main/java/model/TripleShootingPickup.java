@@ -3,6 +3,7 @@ package model;
 import collider.MyCollider;
 import dto.PickupDTO;
 import dto.PickupType;
+import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import strategy.impl.SingleShooting;
 import strategy.impl.TripleShooting;
+import visitor.GameObjectVisitor;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -55,6 +57,16 @@ public class TripleShootingPickup implements Pickup {
                     ship.setShootingStrategy(singleShooting);
                 }
             } , 10000);
+    }
+
+    @Override
+    public Vector2 getPosition() {
+        return Vector2.vector(shape.getLayoutX(), shape.getLayoutY());
+    }
+
+    @Override
+    public void accept(GameObjectVisitor visitor) {
+        visitor.visitTripleShootingPickup(this);
     }
 
     @Override

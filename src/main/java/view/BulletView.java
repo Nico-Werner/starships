@@ -6,7 +6,7 @@ import javafx.scene.image.ImageView;
 import lombok.Getter;
 
 @Getter
-public class BulletView {
+public class BulletView implements View {
     private final ImageView imageView;
 
     public BulletView(Image image, double layoutX, double layoutY, double rotate) {

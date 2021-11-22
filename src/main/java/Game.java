@@ -1,13 +1,16 @@
 import collider.MyCollider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.AsteroidController;
+import controller.BulletController;
 import controller.PickupController;
+import controller.ShipController;
 import dto.AsteroidDTO;
 import dto.PickupDTO;
 import dto.PlayerDTO;
 import edu.austral.dissis.starships.collision.CollisionEngine;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
+import edu.austral.dissis.starships.vector.Vector2;
 import factory.AsteroidFactory;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
@@ -20,6 +23,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import lombok.Setter;
 import model.Asteroid;
+import model.GameObject;
+import model.Ship;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import player.Input;
@@ -30,13 +35,11 @@ import ui.MenuBox;
 import ui.MenuItem;
 import utils.Config;
 import utils.ConfigJson;
+import view.ImageRenderer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Game extends GameApplication {
@@ -172,18 +175,19 @@ class GameManager {
             players = new Player[Config.PLAYERS];
             for (int i = 0; i < Config.PLAYERS; i++) {
                 players[i] = new Player(i, 0, Config.LIVES, Objects.requireNonNull(Config.getPlayerShips())[i],
-                        new Input(Config.PLAYER_KEYS[i][0],
-                        Config.PLAYER_KEYS[i][1],
-                        Config.PLAYER_KEYS[i][2],
-                        Config.PLAYER_KEYS[i][3],
-                        Config.PLAYER_KEYS[i][4]));
+                        new Input(
+                                Config.PLAYER_KEYS[i][0],
+                                Config.PLAYER_KEYS[i][1],
+                                Config.PLAYER_KEYS[i][2],
+                                Config.PLAYER_KEYS[i][3],
+                                Config.PLAYER_KEYS[i][4]
+                        ));
             }
             asteroidController = new AsteroidController();
             pickupController = new PickupController();
         } else {
             players = state.getPlayers().stream().map(PlayerDTO::toPlayer).toArray(Player[]::new);
             asteroidController = new AsteroidController(state.getAsteroids().stream().map(AsteroidDTO::toAsteroid).collect(Collectors.toList()));
-            pane.getChildren().addAll(asteroidController.getViews());
             pickupController = new PickupController(state.getPickups().stream().map(PickupDTO::toPickup).collect(Collectors.toList()));
             pane.getChildren().addAll(pickupController.getViews());
         }
@@ -193,7 +197,6 @@ class GameManager {
             pane.getChildren().add(player.getShipController().getShipView().getImageView());
             pane.getChildren().add(player.getShipController().getShipView().getHealthView());
             pane.getChildren().add(player.getShipController().getShipView().getPoints());
-            pane.getChildren().addAll(player.getShipController().getBulletController().renderBullets());
         }
 
         if(mainTimer == null) mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
@@ -268,6 +271,9 @@ class GameManager {
 
 @Setter
 class MainTimer extends GameTimer {
+
+    //TODO: dejarle funcionalidad exclusiva de llamar al nextFrame y por composición avisarle a otra clase GameManager
+    // el pane y el imageLoader van a ir a parar al tema de renderizado
     Player[] players;
     AsteroidController asteroidController;
     PickupController pickupController;
@@ -276,6 +282,7 @@ class MainTimer extends GameTimer {
     Pane pane;
     AsteroidFactory asteroidFactory = new AsteroidFactory();
     CollisionEngine collisionEngine = new CollisionEngine();
+    ImageRenderer imageRenderer;
 
     boolean paused = false;
 
@@ -286,6 +293,7 @@ class MainTimer extends GameTimer {
         this.pane = pane;
         this.asteroidController = asteroidController;
         this.pickupController = pickupController;
+        this.imageRenderer = new ImageRenderer(pane);
     }
 
     @Override
@@ -297,8 +305,19 @@ class MainTimer extends GameTimer {
         pane.requestFocus();
 
         reviveDeadPlayers();
-        updatePosition(secondsSinceLastFrame);
+
+        List<GameObject> gameObjects = new ArrayList<>();
+        gameObjects.addAll(Arrays.stream(players).map(Player::getShipController).map(ShipController::getBulletController).map(BulletController::getBullets).flatMap(Collection::stream).collect(Collectors.toList()));
+        gameObjects.addAll(asteroidController.getAsteroids());
+        gameObjects.addAll(pickupController.getPickups());
+
+        updatePosition(gameObjects, secondsSinceLastFrame);
+
+        gameObjects.addAll(Arrays.stream(players).map(Player::getShipController).map(ShipController::getShip).collect(Collectors.toList()));
         collisionEngine.checkCollisions(getColliders());
+
+        imageRenderer.renderObjects(gameObjects);
+
         updateHealths();
         updateDeaths();
         spawnAsteroid();
@@ -351,25 +370,27 @@ class MainTimer extends GameTimer {
 
     private void spawnPickup() {
         if(Math.random() * 1000 < 3 && pickupController.getPickups().size() < 5) {
-            ImageView imageView = pickupController.spawnPickup(imageLoader, pane.getWidth(), pane.getHeight());
-            pane.getChildren().add(imageView);
+            pickupController.spawnPickup(imageLoader, pane.getWidth(), pane.getHeight());
         }
     }
 
     private void spawnAsteroid() {
         if(Math.random() * 100.0 < 5) {
             Asteroid asteroid = asteroidFactory.createAsteroid(pane.getWidth(), pane.getHeight());
-            ImageView imageView = asteroidController.spawnAsteroid(asteroid, imageLoader);
-            pane.getChildren().add(imageView);
+            asteroidController.spawnAsteroid(asteroid);
         }
     }
 
-    private void updatePosition(Double secondsSinceLastFrame) {
+    private void updatePosition(List<GameObject> gameObjects, Double secondsSinceLastFrame) {
         for(Player player : players) {
             player.updateInput(pane, keyTracker, secondsSinceLastFrame);
-            player.getShipController().getBulletController().updatePositions(secondsSinceLastFrame);
         }
-        asteroidController.updatePositions(secondsSinceLastFrame);
+        for (GameObject gameObject : gameObjects) {
+            Vector2 movementVector = Vector2.vectorFromModule((gameObject.getSpeed() * secondsSinceLastFrame), (Math.toRadians(gameObject.getDirection())));
+            Vector2 from = Vector2.vector(gameObject.getPosition().getX(), gameObject.getPosition().getY());
+            Vector2 to = from.add(movementVector);
+            gameObject.move(to);
+        }
     }
 
     private List<MyCollider> getColliders() {
@@ -386,12 +407,12 @@ class MainTimer extends GameTimer {
     private void updateDeaths() {
         for(Player player : players) {
             if(player.isShipDead()) {
-                pane.getChildren().remove(player.updateDeath());
+//                 pane.getChildren().remove(player.updateDeath());
             }
-            pane.getChildren().removeAll(player.getShipController().getBulletController().removeDeadBullets(pane.getWidth(), pane.getHeight()));
+             player.getShipController().getBulletController().removeDeadBullets(pane.getWidth(), pane.getHeight());
         }
         asteroidController.killOutOfBounds(pane.getWidth(), pane.getHeight());
-        pane.getChildren().removeAll(asteroidController.updateDeaths());
+        asteroidController.updateDeaths();
         pane.getChildren().removeAll(pickupController.getInactive());
     }
 }
