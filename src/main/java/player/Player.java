@@ -3,7 +3,6 @@ package player;
 import controller.ShipController;
 import dto.PlayerDTO;
 import edu.austral.dissis.starships.game.KeyTracker;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -79,9 +78,8 @@ public class Player implements Serializable, BulletObserver {
     }
 
     public void updateDeath() {
-        ImageView imageView = shipController.updateDeath();
-        if(imageView == null) return;
-        lives--;
+        if (shipController.getShip().shouldBeRemoved())
+            lives--;
     }
 
     public boolean isShipDead() {
@@ -90,5 +88,9 @@ public class Player implements Serializable, BulletObserver {
 
     public void updateShipStyle(String shipName) {
         shipController.updateShipStyle(shipName);
+    }
+
+    public void revive() {
+        shipController.resetShip();
     }
 }

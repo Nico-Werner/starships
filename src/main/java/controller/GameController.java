@@ -16,10 +16,12 @@ import javafx.scene.text.Text;
 import model.Asteroid;
 import model.GameObject;
 import player.Player;
-import utils.Config;
 import view.ImageRenderer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class GameController {
@@ -73,10 +75,7 @@ public class GameController {
     private void reviveDeadPlayers() {
         for (Player player : players) {
             if (player.getLives() > 0 && player.getShipController().getShip().getHealth() <= 0) {
-                player.setShipController(Objects.requireNonNull(Config.getPlayerShips())[player.getId()]);
-                pane.getChildren().add(player.getShipController().getShipView().getImageView());
-                pane.getChildren().add(player.getShipController().getShipView().getHealthView());
-                pane.getChildren().add(player.getShipController().getShipView().getPoints());
+                player.revive();
             }
         }
     }
@@ -130,17 +129,6 @@ public class GameController {
             gameObject.move(to);
         }
     }
-
-//    private List<MyCollider> getColliders() {
-//        List<MyCollider> colliders = new ArrayList<>();
-//        for (Player player : players) {
-//            colliders.add(player.getShipController().getShip());
-//            colliders.addAll(player.getShipController().getBulletController().getBullets());
-//        }
-//        colliders.addAll(asteroidController.getAsteroids());
-//        colliders.addAll(pickupController.getPickups());
-//        return colliders;
-//    }
 
     private void updateDeaths() {
         for(Player player : players) {

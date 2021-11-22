@@ -1,7 +1,6 @@
 package view;
 
 import edu.austral.dissis.starships.file.ImageLoader;
-import edu.austral.dissis.starships.vector.Vector2;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -39,15 +38,6 @@ public class ShipView implements View{
         points.setFont(Font.font(20));
         points.setFill(Color.WHITE);
         points.setText("0");
-    }
-
-    public void move(Vector2 to) {
-        imageView.setLayoutX(to.getX());
-        imageView.setLayoutY(to.getY());
-        healthView.setLayoutX(to.getX());
-        healthView.setLayoutY(to.getY() + 100);
-        points.setLayoutX(to.getX());
-        points.setLayoutY(to.getY());
     }
 
     public void updateHealth(Double health) {

@@ -6,11 +6,13 @@ import dto.PickupDTO;
 import dto.PlayerDTO;
 import edu.austral.dissis.starships.file.ImageLoader;
 import edu.austral.dissis.starships.game.*;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -176,14 +178,23 @@ class GameManager {
             pickupController = new PickupController(state.getPickups().stream().map(PickupDTO::toPickup).collect(Collectors.toList()));
         }
 
-        for (Player player : players) {
+        for (int i = 0, playersLength = players.length; i < playersLength; i++) {
+            Player player = players[i];
             player.updateShipStyle(Config.SHIP_NAMES[player.getId()]);
-            pane.getChildren().add(player.getShipController().getShipView().getImageView());
-            pane.getChildren().add(player.getShipController().getShipView().getHealthView());
-            pane.getChildren().add(player.getShipController().getShipView().getPoints());
+
+            Group healthView = player.getShipController().getShipView().getHealthView();
+            healthView.setLayoutX(10 + 120 * i);
+            healthView.setLayoutY(10);
+            pane.getChildren().add(healthView);
+
+            Text points = player.getShipController().getShipView().getPoints();
+            points.setLayoutX(10 + 120 * i);
+            points.setLayoutY(30);
+            pane.getChildren().add(points);
         }
 
-        if(mainTimer == null) mainTimer = new MainTimer(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
+        if (mainTimer == null)
+            mainTimer = new MainTimer(players, context.getKeyTracker(), pane, asteroidController, pickupController);
         mainTimer.loadController(players, context.getKeyTracker(), imageLoader, pane, asteroidController, pickupController);
 
         pane.setOnKeyPressed(event -> {
@@ -255,7 +266,7 @@ class MainTimer extends GameTimer {
 
     boolean paused = false;
 
-    public MainTimer(Player[] players, KeyTracker keyTracker, ImageLoader imageLoader, Pane pane, AsteroidController asteroidController, PickupController pickupController) {
+    public MainTimer(Player[] players, KeyTracker keyTracker, Pane pane, AsteroidController asteroidController, PickupController pickupController) {
         gameController = new GameController(players, keyTracker, pane, asteroidController, pickupController);
     }
 

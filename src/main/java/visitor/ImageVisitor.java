@@ -13,7 +13,8 @@ import java.io.IOException;
 
 public class ImageVisitor implements GameObjectVisitor {
     private Image asteroidImage;
-    private Image shipImage;
+    private Image blueShipImage;
+    private Image greenShipImage;
     private Image bulletImage;
     private Image healthPickupImage;
     private Image speedPickupImage;
@@ -27,7 +28,8 @@ public class ImageVisitor implements GameObjectVisitor {
         ImageLoader imageLoader = new ImageLoader();
         try {
             this.asteroidImage = imageLoader.loadFromResources("asteroid.png", 500, 500);
-            this.shipImage = imageLoader.loadFromResources("starship.gif", 100, 100);
+            this.blueShipImage = imageLoader.loadFromResources("starship.gif", 100, 100);
+            this.greenShipImage = imageLoader.loadFromResources("green-ship.png", 100, 100);
             this.bulletImage = imageLoader.loadFromResources("bullet.png", 20, 20);
             this.healthPickupImage = imageLoader.loadFromResources("health.png", 50, 50);
             this.speedPickupImage = imageLoader.loadFromResources("speed.png", 50, 50);
@@ -47,7 +49,10 @@ public class ImageVisitor implements GameObjectVisitor {
 
     @Override
     public void visitShip(Ship ship) {
-        result = new ShipView(shipImage, (int) ship.getPosition().getX(), (int) ship.getPosition().getY());
+        if (ship.getName().equals("starship.gif"))
+            result = new ShipView(blueShipImage, (int) ship.getPosition().getX(), (int) ship.getPosition().getY());
+        else
+            result = new ShipView(greenShipImage, (int) ship.getPosition().getX(), (int) ship.getPosition().getY());
     }
 
     @Override

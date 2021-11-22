@@ -26,6 +26,9 @@ public class Ship implements GameObject {
     private double direction;
     private double speed;
 
+    @Builder.Default
+    private String name = "starship.gif";
+
     public Ship(Double health, ShootingStrategy shootingStrategy, Vector2 position, double speed) {
         this.health = health;
         this.maxHealth = health;
@@ -101,5 +104,9 @@ public class Ship implements GameObject {
     @Override
     public void accept(GameObjectVisitor visitor) {
         visitor.visitShip(this);
+    }
+
+    public void reset() {
+        health = maxHealth;
     }
 }

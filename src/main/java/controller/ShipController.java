@@ -89,6 +89,11 @@ public class ShipController implements Serializable {
     }
 
     public void updateShipStyle(String shipName) {
+        ship.setName(shipName);
         shipView.updateShipStyle(shipName);
+    }
+
+    public void resetShip() {
+        ship.reset();
     }
 }
