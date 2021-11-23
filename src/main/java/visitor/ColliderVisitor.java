@@ -15,15 +15,16 @@ public class ColliderVisitor implements GameObjectVisitor{
 
     @Override
     public void visitAsteroid(Asteroid asteroid) {
-        Shape shape = new Rectangle(asteroid.getHealth(), asteroid.getHealth());
-        setPosition(shape, asteroid.getPosition().getX(), asteroid.getPosition().getY(), asteroid.getDirection());
+        double colliderReduction = asteroid.getHealth() - 40 > 0 ? 40 : 10;
+        Shape shape = new Rectangle(asteroid.getHealth() - colliderReduction, asteroid.getHealth() - colliderReduction);
+        setPosition(shape, asteroid.getPosition().getX() + colliderReduction / 2, asteroid.getPosition().getY() + colliderReduction / 2, asteroid.getDirection());
         result = new CollideableObject(asteroid, shape);
     }
 
     @Override
     public void visitShip(Ship ship) {
         Shape shape = new Rectangle(70, 45);
-        setPosition(shape, ship.getPosition().getX(), ship.getPosition().getY(), ship.getDirection());
+        setPosition(shape, ship.getPosition().getX() + 15, ship.getPosition().getY() + 17.5, ship.getDirection());
         result = new CollideableObject(ship, shape);
     }
 

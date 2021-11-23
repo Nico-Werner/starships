@@ -16,7 +16,7 @@ import javafx.scene.text.Text;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import player.Input;
+import player.KeyCodeInput;
 import player.Player;
 import serializer.GameSerializer;
 import serializer.GameState;
@@ -162,7 +162,7 @@ class GameManager {
             players = new Player[Config.PLAYERS];
             for (int i = 0; i < Config.PLAYERS; i++) {
                 players[i] = new Player(i, 0, Config.LIVES, Objects.requireNonNull(Config.getPlayerShips())[i],
-                        new Input(
+                        new KeyCodeInput(
                                 Config.PLAYER_KEYS[i][0],
                                 Config.PLAYER_KEYS[i][1],
                                 Config.PLAYER_KEYS[i][2],

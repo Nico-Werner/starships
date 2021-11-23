@@ -4,7 +4,7 @@ import controller.ShipController;
 import javafx.scene.input.KeyCode;
 import lombok.Builder;
 import lombok.Data;
-import player.Input;
+import player.KeyCodeInput;
 import player.Player;
 
 import java.io.Serializable;
@@ -33,7 +33,7 @@ public class PlayerDTO implements Serializable {
                 .score(score)
                 .lives(lives)
                 .shipController(shipController)
-                .input(new Input(keyForward, keyRotateLeft, keyBackward, keyRotateRight, keyShoot))
+                .input(new KeyCodeInput(keyForward, keyRotateLeft, keyBackward, keyRotateRight, keyShoot))
                 .build();
 
         shipController.getBulletController().getBullets().forEach(bullet -> bullet.setObservers(List.of(player)));

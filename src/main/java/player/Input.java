@@ -1,15 +1,13 @@
 package player;
 
-import javafx.scene.input.KeyCode;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public interface Input<T> {
+    T getKeyForward();
 
-@Data
-@AllArgsConstructor
-public class Input {
-    private KeyCode keyForward;
-    private KeyCode keyRotateLeft;
-    private KeyCode keyBackward;
-    private KeyCode keyRotateRight;
-    private KeyCode keyShoot;
+    T getKeyBackward();
+
+    T getKeyRotateLeft();
+
+    T getKeyRotateRight();
+
+    T getKeyShoot();
 }

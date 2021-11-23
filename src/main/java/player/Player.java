@@ -22,10 +22,7 @@ public class Player implements Serializable, BulletObserver {
     private int lives;
     private ShipController shipController;
 
-    // TODO unificarlo en una clase "input" para no manejar keycodes directamente.
-    // (idea: podría pasar el update al input y que devuelva un command...)
-    // podria ser con generics y despues en una implementacion especificar que es para keyCode.
-    Input input;
+    KeyCodeInput input;
 
     public void updateInput(Pane pane, KeyTracker keyTracker, double secondsSinceLastFrame) {
         if(isDead()) return;
